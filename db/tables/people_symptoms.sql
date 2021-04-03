@@ -15,5 +15,5 @@ CREATE TABLE people_symptoms(
 	FOREIGN KEY (symptom_id) REFERENCES symptoms(id),
 	FOREIGN KEY (vaccine_id) REFERENCES vaccines(id),
 
-	PRIMARY KEY (vaers_id, symptom_id, vaccine_id)
+    PRIMARY KEY (vaers_id, symptom_id, vaccine_id)
 );

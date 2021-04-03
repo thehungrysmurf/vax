@@ -1,6 +1,5 @@
--- noinspection SqlNoDataSourceInspectionForFile
-
-DROP TABLE IF EXISTS people;
+DROP TABLE IF EXISTS people CASCADE;
+DROP TYPE IF EXISTS SEX;
 
 CREATE TYPE SEX AS ENUM ('M', 'F', 'unknown');
 
@@ -30,5 +29,7 @@ CREATE TABLE people(
 
     created_at TIMESTAMPTZ
     	NOT NULL
-        DEFAULT NOW()
+        DEFAULT NOW(),
+
+    UNIQUE(vaers_id)
 );
