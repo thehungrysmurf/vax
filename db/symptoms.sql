@@ -1,0 +1,18 @@
+DROP TABLE IF EXISTS symptoms;
+
+CREATE TABLE symptoms(
+
+	id BIGSERIAL
+		PRIMARY KEY,
+
+	symptom VARCHAR(255)
+		NOT NULL,
+
+	alias VARCHAR(255)
+		NOT NULL
+		DEFAULT '',
+
+	created_at TIMESTAMPTZ
+		NOT NULL
+        DEFAULT NOW()
+);

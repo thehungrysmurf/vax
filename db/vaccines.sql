@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS vaccines;
+
+CREATE TYPE ILLNESS AS ENUM ('covid19');
+
+CREATE TABLE vaccines(
+
+	id SERIAL
+		PRIMARY KEY,
+
+	illness ILLNESS
+		NOT NULL,
+
+	manufacturer VARCHAR(255)
+		NOT NULL,
+
+	created_at TIMESTAMPTZ
+		NOT NULL
+        DEFAULT NOW()
+);
