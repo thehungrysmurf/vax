@@ -2,10 +2,10 @@ DROP TABLE IF EXISTS symptoms_categories;
 
 CREATE TABLE symptoms_categories(
 
-	symptom_id BIGSERIAL
+	symptom_id BIGINT
 		NOT NULL,
 
-	category_id BIGSERIAL
+	category_id BIGINT
 		NOT NULL,
 
 	FOREIGN KEY (symptom_id) REFERENCES symptoms(id),

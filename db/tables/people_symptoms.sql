@@ -2,13 +2,13 @@ DROP TABLE IF EXISTS people_symptoms;
 
 CREATE TABLE people_symptoms(
 
-	vaers_id BIGSERIAL
+	vaers_id BIGINT
 		NOT NULL,
 
-	symptom_id BIGSERIAL
+	symptom_id BIGINT
 		NOT NULL,
 
-	vaccine_id SERIAL
+	vaccine_id INT
 		NOT NULL,
 
 	FOREIGN KEY (vaers_id) REFERENCES people(vaers_id),
