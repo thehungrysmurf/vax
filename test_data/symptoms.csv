@@ -1,0 +1,7 @@
+VAERS_ID,SYMPTOM1,SYMPTOMVERSION1,SYMPTOM2,SYMPTOMVERSION2,SYMPTOM3,SYMPTOMVERSION3,SYMPTOM4,SYMPTOMVERSION4,SYMPTOM5,SYMPTOMVERSION5
+0916600,Dysphagia,23.10,Epiglottitis,23.10,,,,,,
+0916601,Anxiety,23.10,Dyspnoea,23.10,,,,,,
+0916602,Chest discomfort,23.10,Dysphagia,23.10,Pain in extremity,23.10,Visual impairment,23.10,,
+0916603,Dizziness,23.10,Fatigue,23.10,Mobility decreased,23.10,,,,
+0916604,Injection site erythema,23.10,Injection site pruritus,23.10,Injection site swelling,23.10,Injection site warmth,23.10,,
+0916606,Pharyngeal swelling,23.10,,,,,,,,
