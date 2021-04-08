@@ -1,86 +1,41 @@
 package store
 
-import "time"
+import (
+	"github.com/jackc/pgx/v4"
+)
 
 type Store interface {
 	InsertReport(report Report) (int64, error)
 }
 
 type DB struct {
-
-}
-
-type Gender string
-
-const(
-	Male Gender = "M"
-	Female = "F"
-	Unknown = "U"
-)
-
-type Report struct {
-	VaersID int64
-	Age int
-	Gender Gender
-	Notes string
-	ReportedAt time.Time
-}
-
-type Symptom struct {
-	Name string
-	Alias string
-}
-
-type Illness string
-
-const(
-	Covid19 Illness = "covid19"
-)
-
-type Manufacturer string
-
-const(
-	Moderna Manufacturer = "moderna"
-	Pfizer = "pfizer"
-	JohnsonAndJohnson = "janssen"
-)
-
-type Vaccine struct {
-	Illness Illness
-	Manufacturer Manufacturer
+	conn *pgx.Conn
 }
 
 const InsertReportQuery = `INSERT INTO people (vaers_id, age, sex, notes, reported_at) VALUES ($1, $2, $3, $4, $5);`
-const InsertSymptomQuery = ``
-const InsertCategoryQuery = ``
+const InsertVaccineQuery = `INSERT INTO vaccines (illness, manufacturer) VALUES ($1, $2);`
+const InsertSymptomQuery = `INSERT INTO symptoms (symptom, alias) VALUES ($1, $2);`
 
-func(s *DB) InsertReport(r Report) (int64, error) {
+const InsertPeopleSymptomsQuery = `INSERT INTO people_symptoms(vaers_id, symptom_id, vaccine_id) VALUES ($1, $2, $3);`
+const InsertSymptomsCategoryQuery = `INSERT INTO symptoms_categories (symptom_id, category_id) VALUES ($1, $2);`
+
+func NewDB(conn *pgx.Conn) *DB {
+	return &DB{
+		conn: conn,
+	}
+}
+func(d *DB) InsertReport(r Report) (int64, error) {
 	return 0, nil
 }
 
-/*
-
-1. parse reports file, insert into people table
-2. parse vaccines file, store in map
-
-2.
-option 1
-parse symptoms file, for each record
-- select people.id corresponding to the source vaers_id - NOW WE HAVE THE PEOPLE ID
-- select vaccine id
-- populate symptoms lookup and insert if not exists - NOW WE HAVE THE SYMPTOMS ID
-- populate people_symptoms NOW WE HAVE BOTH IDS AND WE CAN POPULATE THIS TABLE
-- populate symptoms_categories (after lookup in a symptoms<>categories map)
--
-
-map[VaersID]Summary struct {
-	SymptomIDs []int
-	VaccineID int
+func(d *DB) InsertVaccine(v Vaccine) (int64, error) {
+	return 0, nil
 }
 
-- parse reports file, insert into people table, add Summary empty to map
-- parse vaccines file, insert into vaccines table, lookup Summary from map, set VaccineID
-- parse symptoms files, insert into symptoms table, lookup Summary from map, append SymptomID
-- range over map, insert into people_symptoms
+func(d *DB) InsertSymptom(s Symptom) (int64, error) {
+	return 0, nil
+}
 
-*/
+func(d *DB) InsertPeopleSymptoms(vaccineID int, symptomID int64) error {
+	return nil
+}
