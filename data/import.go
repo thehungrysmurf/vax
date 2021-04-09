@@ -30,7 +30,7 @@ type CSVImporter struct {
 }
 
 type Summary struct {
-	SymptomIDs []int64
+	Symptoms []store.Symptom
 	VaccineID int
 }
 
@@ -44,13 +44,7 @@ func NewCSVImporter(reportsFilePath, vaccinesFilePath, symptomsFilePath string, 
 }
 
 func (i CSVImporter) Run() error {
-	summaryMap := map[int64]Summary{}
-
-	err := i.ReadReportsFile(summaryMap)
-	if err != nil {
-		log.Fatalf("failed to read reports file: %v", err)
-		return err
-	}
+	summaryMap := map[int64]*Summary{}
 
 	vaccineMap, err := i.ReadVaccinesFile(summaryMap)
 	if err != nil {
@@ -58,94 +52,44 @@ func (i CSVImporter) Run() error {
 		return err
 	}
 
-	fmt.Printf("size of vaccine map: %v \n", len(vaccineMap))
+	if err := i.ReadReportsFile(summaryMap); err != nil {
+		log.Fatalf("failed to read reports file: %v", err)
+		return err
+	}
 
-	_, err = i.ReadSymptomsFile(vaccineMap, summaryMap)
-	if err != nil {
+	if _, err = i.ReadSymptomsFile(vaccineMap, summaryMap); err != nil {
 		log.Fatalf("failed to read symptoms file: %v", err)
 		return err
 	}
 
-	// range over map, insert into people_symptoms
+	// TODO alert if any symptoms with count 50+ are not in category map
+
+	for id, s := range summaryMap {
+		log.Printf("complete summary map, vaersID: %v, summary: %+v", id, *s)
+	}
+
+	// Populate people_symptoms, symptoms_categories
 	for vaers_id, summary := range summaryMap {
-		for _, symptomID := range summary.SymptomIDs {
-			if err := i.DBClient.InsertPeopleSymptoms(summary.VaccineID, symptomID); err != nil {
+		for _, symptom := range summary.Symptoms {
+			if err := i.DBClient.InsertPeopleSymptoms(summary.VaccineID, symptom.ID); err != nil {
 				log.Printf("failed to insert people symptoms row for vaers_id %v", vaers_id)
 				continue
 			}
-		}
-	}
 
-	return nil
-}
-
-// parse reports file, insert into people table, add Summary empty to map
-func (i CSVImporter) ReadReportsFile(summaryMap map[int64]Summary) error {
-	csvFile, err := os.Open(i.ReportsFilePath)
-	if err != nil {
-		log.Printf("failed to open reports csv file: %v", err)
-		return err
-	}
-
-	reader := csv.NewReader(bufio.NewReader(csvFile))
-	linesRead := 0
-
-	for {
-		line, err := reader.Read()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			log.Printf("failed to read from reports csv file: %v", err)
-			return err
-		}
-		linesRead++
-
-		if linesRead > 1 {
-			vaersID, err := strconv.ParseInt(line[0], 10, 64)
-			if err != nil {
-				log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
-				continue
-			}
-
-			var age float64
-			if line[3] != "" {
-				age, err = strconv.ParseFloat(line[3], 0)
-				if err != nil {
-					log.Printf("failed to convert age %q to int64, skipping row", line[3])
+			for _, cID:= range symptom.CategoryIDs {
+				if err := i.DBClient.InsertSymptomsCategories(symptom.ID, cID); err != nil {
+					log.Printf("failed to insert symptoms categories row for symptom ID %v, category ID %v", symptom.ID, cID)
 					continue
 				}
 			}
-
-			reportedAt, err := time.Parse("01/02/2006", line[1])
-			if err != nil {
-				log.Printf("failed to convert reportedAt %q to time format, skipping row", line[1])
-				continue
-			}
-
-			var g store.Gender
-			r := store.Report{
-				VaersID:    vaersID,
-				Age:        int(age),
-				Gender:     g.FromString(line[6]),
-				Notes:      line[8],
-				ReportedAt: reportedAt,
-			}
-
-			if _, err := i.DBClient.InsertReport(r); err != nil {
-				log.Printf("failed to insert report for vaers_id %s", r.VaersID)
-				continue
-			}
-
-			summaryMap[r.VaersID] = Summary{}
 		}
 	}
 
-	log.Printf("finished reading reports file, read %d lines", linesRead)
 	return nil
 }
 
-// parse vaccines file, insert into vaccines table, lookup Summary from map, set VaccineID
-func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]Summary) (map[int64]bool, error) {
+// Parse vaccines file, insert into vaccines table, set VaccineID in summary map
+func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]*Summary) (map[int64]bool, error) {
 	csvFile, err := os.Open(i.VaccinesFilePath)
 	if err != nil {
 		log.Printf("failed to open csv vaccines file: %v", err)
@@ -192,13 +136,7 @@ func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]Summary) (map[int64]b
 					continue
 				}
 
-				s, ok := summaryMap[vaersID]
-				if !ok {
-					log.Printf("failed to fetch summary for vaers_id %s, skipping row", vaersID)
-					continue
-				}
-
-				s.VaccineID = int(vaccineID)
+				summaryMap[vaersID] = &Summary{VaccineID: int(vaccineID)}
 			}
 		}
 	}
@@ -207,8 +145,74 @@ func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]Summary) (map[int64]b
 	return vaccineMap, nil
 }
 
-// parse symptoms files, insert into symptoms table, lookup Summary from map, append SymptomID
-func (i *CSVImporter) ReadSymptomsFile(vaccineMap map[int64]bool, summaryMap map[int64]Summary) (map[string]int, error) {
+// Parse reports file, insert into people table
+func (i CSVImporter) ReadReportsFile(summaryMap map[int64]*Summary) error {
+	csvFile, err := os.Open(i.ReportsFilePath)
+	if err != nil {
+		log.Printf("failed to open reports csv file: %v", err)
+		return err
+	}
+
+	reader := csv.NewReader(bufio.NewReader(csvFile))
+	linesRead := 0
+
+	for {
+		line, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Printf("failed to read from reports csv file: %v", err)
+			return err
+		}
+		linesRead++
+
+		if linesRead > 1 {
+			vaersID, err := strconv.ParseInt(line[0], 10, 64)
+			if err != nil {
+				log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
+				continue
+			}
+
+			// Add to DB only if covid19 row
+			if _, ok := summaryMap[vaersID]; ok {
+				var age float64
+				if line[3] != "" {
+					age, err = strconv.ParseFloat(line[3], 0)
+					if err != nil {
+						log.Printf("failed to convert age %q to int64, skipping row", line[3])
+						continue
+					}
+				}
+
+				reportedAt, err := time.Parse("01/02/2006", line[1])
+				if err != nil {
+					log.Printf("failed to convert reportedAt %q to time format, skipping row", line[1])
+					continue
+				}
+
+				var g store.Gender
+				r := store.Report{
+					VaersID:    vaersID,
+					Age:        int(age),
+					Gender:     g.FromString(line[6]),
+					Notes:      line[8],
+					ReportedAt: reportedAt,
+				}
+
+				if _, err := i.DBClient.InsertReport(r); err != nil {
+					log.Printf("failed to insert report for vaers_id %s", r.VaersID)
+					continue
+				}
+			}
+		}
+	}
+
+	log.Printf("finished reading reports file, read %d lines", linesRead)
+	return nil
+}
+
+// Parse symptoms file, insert into symptoms table, lookup categories for symptom and populate Symptoms in summary map
+func (i *CSVImporter) ReadSymptomsFile(vaccineMap map[int64]bool, summaryMap map[int64]*Summary) (map[string]int, error) {
 	csvFile, err := os.Open(i.SymptomsFilePath)
 	if err != nil {
 		log.Printf("failed to open symptoms csv file: %v", err)
@@ -236,39 +240,60 @@ func (i *CSVImporter) ReadSymptomsFile(vaccineMap map[int64]bool, summaryMap map
 			}
 
 			symptoms := []string{line[1], line[3], line[5], line[7], line[9]}
+
 			if _, ok := vaccineMap[id]; ok {
 				symptomsToAdd := symptoms
 				loadSymptoms(symptomsMap, symptomsToAdd)
 			}
 
-			for _, s:= range symptoms {
-				s := store.Symptom{
-					Name:  s,
-					Alias: "TBD",
-				}
-				symptomID, err := i.DBClient.InsertSymptom(s)
-				if err != nil {
-					log.Printf("failed to insert symptom for vaers_id %s, skipping row", line[0])
-					continue
-				}
+			for _, s := range symptoms {
+				if s != "" {
+					s = strings.ToLower(s)
+					categories, ok := categoriesMap[s]
+					if !ok {
+						log.Printf("symptom %s not found in categories map, skipping", s)
+						continue
+					}
 
-				vaersID, err := strconv.ParseInt(line[0], 10, 64)
-				if err != nil {
-					log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
-					continue
-				}
+					symptom := store.Symptom{Name:  s}
+					if a, ok := aliasesMap[s]; ok {
+						symptom.Alias = a
+					}
 
-				summary, ok := summaryMap[vaersID]
-				if !ok {
-					log.Printf("failed to fetch summary for vaers_id %s, skipping row", vaersID)
-					continue
-				}
+					sID, err := i.DBClient.InsertSymptom(symptom)
+					if err != nil {
+						log.Printf("failed to insert symptom %s for vaers_id %s, skipping row", s, line[0])
+						continue
+					}
+					symptom.ID = sID
 
-				summary.SymptomIDs = append(summary.SymptomIDs, symptomID)
+					vaersID, err := strconv.ParseInt(line[0], 10, 64)
+					if err != nil {
+						log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
+						continue
+					}
+
+					if _, ok := summaryMap[vaersID]; !ok {
+						log.Printf("failed to fetch summary for vaers_id %s, skipping row", vaersID)
+						continue
+					}
+
+					var categoryIDs []int
+					for _, c := range categories {
+						cID, err := i.DBClient.GetCategoryID(c)
+						if err != nil {
+							log.Printf("failed to fetch category ID for category %s", c)
+						}
+						categoryIDs = append(categoryIDs, cID)
+					}
+
+					symptom.CategoryIDs = categoryIDs
+					summaryMap[vaersID].Symptoms = append(summaryMap[vaersID].Symptoms, symptom)
+				}
 			}
-
 		}
 	}
+
 	log.Printf("finished reading symptoms file, read %d lines \n", linesRead)
 	return symptomsMap, nil
 }

@@ -33,8 +33,10 @@ type Report struct {
 }
 
 type Symptom struct {
+	ID int64
 	Name string
 	Alias string
+	CategoryIDs []int
 }
 
 type Illness string
