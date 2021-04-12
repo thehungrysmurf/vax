@@ -5,16 +5,16 @@ import (
 	"time"
 )
 
-type Gender string
+type Sex string
 
 const(
-	UnknownGender Gender = "U"
+	UnknownGender Sex = "U"
 	Male = "M"
 	Female = "F"
 )
 
-func(g *Gender) FromString(s string) Gender {
-	switch s {
+func(s *Sex) FromString(str string) Sex {
+	switch str {
 	case "M":
 		return Male
 	case "F":
@@ -27,7 +27,7 @@ func(g *Gender) FromString(s string) Gender {
 type Report struct {
 	VaersID int64
 	Age int
-	Gender Gender
+	Sex Sex
 	Notes string
 	ReportedAt time.Time
 }
@@ -42,7 +42,8 @@ type Symptom struct {
 type Illness string
 
 const(
-	Covid19 Illness = "covid19"
+	UnknownIllness Illness = "unknown"
+	Covid19 = "covid19"
 )
 
 type Manufacturer string
@@ -55,8 +56,7 @@ const(
 )
 
 func(m *Manufacturer) FromString(s string) Manufacturer {
-	lower := strings.ToLower(s)
-	switch lower {
+	switch strings.ToLower(s) {
 		case "moderna":
 			return Moderna
 		case `pfizer\biontech`:
@@ -71,4 +71,13 @@ func(m *Manufacturer) FromString(s string) Manufacturer {
 type Vaccine struct {
 	Illness Illness
 	Manufacturer Manufacturer
+}
+
+func(i *Illness) FromString(s string) Illness {
+	switch strings.ToLower(s) {
+	case "covid19":
+		return Covid19
+	default:
+		return UnknownIllness
+	}
 }

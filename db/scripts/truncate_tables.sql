@@ -1,0 +1,4 @@
+TRUNCATE TABLE people_symptoms CASCADE;
+TRUNCATE TABLE symptoms_categories CASCADE;
+TRUNCATE TABLE symptoms CASCADE;
+TRUNCATE TABLE people CASCADE;

@@ -1,11 +1,11 @@
-DROP TABLE IF EXISTS symptoms;
+DROP TABLE IF EXISTS symptoms CASCADE;
 
 CREATE TABLE symptoms(
 
 	id BIGSERIAL
 		PRIMARY KEY,
 
-	symptom VARCHAR(255)
+	name VARCHAR(255)
 		NOT NULL,
 
 	alias VARCHAR(255)
@@ -14,5 +14,7 @@ CREATE TABLE symptoms(
 
 	created_at TIMESTAMPTZ
 		NOT NULL
-        DEFAULT NOW()
+        DEFAULT NOW(),
+
+    UNIQUE(name)
 );

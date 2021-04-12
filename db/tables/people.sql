@@ -17,7 +17,7 @@ CREATE TABLE people(
 
 	sex SEX
 		NOT NULL
-		DEFAULT 'unknown',
+		DEFAULT 'U',
 
 	notes VARCHAR(512)
 		NOT NULL
