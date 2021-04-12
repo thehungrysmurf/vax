@@ -60,7 +60,7 @@ func(d *DB) InsertPeopleSymptom(ctx context.Context, vaersID, symID int64, vaxID
 	return err
 }
 
-const InsertSymptomCategoryQuery = `INSERT INTO symptoms_categories (symptom_id, category_id) VALUES ($1, $2);`
+const InsertSymptomCategoryQuery = `INSERT INTO symptoms_categories (symptom_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;`
 
 func(d *DB) InsertSymptomCategory(ctx context.Context, symID int64, catID int) error {
 	_, err := d.conn.Exec(ctx, InsertSymptomCategoryQuery, symID, catID)

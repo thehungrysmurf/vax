@@ -2,6 +2,7 @@ package data
 
 import (
 	"bufio"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/thehungrysmurf/vax/db/store"
 )
+
+const Covid19 = "covid19"
 
 type Importer interface {
 	Run() error
@@ -45,19 +48,20 @@ func NewCSVImporter(reportsFilePath, vaccinesFilePath, symptomsFilePath string, 
 
 func (i CSVImporter) Run() error {
 	summaryMap := map[int64]*Summary{}
+	ctx := context.Background()
 
-	vaccineMap, err := i.ReadVaccinesFile(summaryMap)
+	vaccineMap, err := i.ReadVaccinesFile(ctx, summaryMap)
 	if err != nil {
 		log.Fatalf("failed to read vaccines file: %v", err)
 		return err
 	}
 
-	if err := i.ReadReportsFile(summaryMap); err != nil {
+	if err := i.ReadReportsFile(ctx, summaryMap); err != nil {
 		log.Fatalf("failed to read reports file: %v", err)
 		return err
 	}
 
-	if _, err = i.ReadSymptomsFile(vaccineMap, summaryMap); err != nil {
+	if _, err = i.ReadSymptomsFile(ctx, vaccineMap, summaryMap); err != nil {
 		log.Fatalf("failed to read symptoms file: %v", err)
 		return err
 	}
@@ -69,16 +73,16 @@ func (i CSVImporter) Run() error {
 	}
 
 	// Populate people_symptoms, symptoms_categories
-	for vaers_id, summary := range summaryMap {
+	for vaersID, summary := range summaryMap {
 		for _, symptom := range summary.Symptoms {
-			if err := i.DBClient.InsertPeopleSymptoms(summary.VaccineID, symptom.ID); err != nil {
-				log.Printf("failed to insert people symptoms row for vaers_id %v", vaers_id)
+			if err := i.DBClient.InsertPeopleSymptom(ctx, vaersID, symptom.ID, summary.VaccineID); err != nil {
+				log.Printf("failed to insert people symptoms row for vaers_id: %v, symptom_id: %v, vaccine_id: %v %v", vaersID, symptom.ID, summary.VaccineID, err)
 				continue
 			}
 
 			for _, cID:= range symptom.CategoryIDs {
-				if err := i.DBClient.InsertSymptomsCategories(symptom.ID, cID); err != nil {
-					log.Printf("failed to insert symptoms categories row for symptom ID %v, category ID %v", symptom.ID, cID)
+				if err := i.DBClient.InsertSymptomCategory(ctx, symptom.ID, cID); err != nil {
+					log.Printf("failed to insert symptoms categories row for vaers_id: %v, symptom_id: %v, category_id: %v %v", vaersID, symptom.ID, cID, err)
 					continue
 				}
 			}
@@ -89,7 +93,7 @@ func (i CSVImporter) Run() error {
 }
 
 // Parse vaccines file, insert into vaccines table, set VaccineID in summary map
-func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]*Summary) (map[int64]bool, error) {
+func (i CSVImporter) ReadVaccinesFile(ctx context.Context, summaryMap map[int64]*Summary) (map[int64]bool, error) {
 	csvFile, err := os.Open(i.VaccinesFilePath)
 	if err != nil {
 		log.Printf("failed to open csv vaccines file: %v", err)
@@ -111,7 +115,7 @@ func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]*Summary) (map[int64]
 		linesRead++
 
 		if linesRead > 1 {
-			if line[1] == "COVID19" {
+			if strings.ToLower(line[1]) == Covid19 {
 				id, err := strconv.ParseInt(line[0], 10, 64)
 				if err != nil {
 					log.Printf("failed to convert ID %s to int: %v", line[0], err)
@@ -119,14 +123,16 @@ func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]*Summary) (map[int64]
 				}
 				vaccineMap[id] = true
 
-				var m store.Manufacturer
+				var manufacturer store.Manufacturer
+				manufacturer = manufacturer.FromString(line[2])
 				v := store.Vaccine{
-					Illness:      store.Covid19,
-					Manufacturer: m.FromString(line[2]),
+					Illness:      Covid19,
+					Manufacturer: manufacturer,
 				}
-				vaccineID, err := i.DBClient.InsertVaccine(v)
+
+				vaccineID, err := i.DBClient.GetVaccineID(ctx, v)
 				if err != nil {
-					log.Printf("failed to insert vaccine for vaers_id %s, skipping row", line[0])
+					log.Printf("failed to get vaccine ID for vaers_id %v", line[0])
 					continue
 				}
 
@@ -136,7 +142,7 @@ func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]*Summary) (map[int64]
 					continue
 				}
 
-				summaryMap[vaersID] = &Summary{VaccineID: int(vaccineID)}
+				summaryMap[vaersID] = &Summary{VaccineID: vaccineID}
 			}
 		}
 	}
@@ -146,7 +152,7 @@ func (i CSVImporter) ReadVaccinesFile(summaryMap map[int64]*Summary) (map[int64]
 }
 
 // Parse reports file, insert into people table
-func (i CSVImporter) ReadReportsFile(summaryMap map[int64]*Summary) error {
+func (i CSVImporter) ReadReportsFile(ctx context.Context, summaryMap map[int64]*Summary) error {
 	csvFile, err := os.Open(i.ReportsFilePath)
 	if err != nil {
 		log.Printf("failed to open reports csv file: %v", err)
@@ -190,17 +196,17 @@ func (i CSVImporter) ReadReportsFile(summaryMap map[int64]*Summary) error {
 					continue
 				}
 
-				var g store.Gender
+				var s store.Sex
 				r := store.Report{
 					VaersID:    vaersID,
 					Age:        int(age),
-					Gender:     g.FromString(line[6]),
+					Sex:     s.FromString(line[6]),
 					Notes:      line[8],
 					ReportedAt: reportedAt,
 				}
 
-				if _, err := i.DBClient.InsertReport(r); err != nil {
-					log.Printf("failed to insert report for vaers_id %s", r.VaersID)
+				if err = i.DBClient.InsertReport(ctx, r); err != nil {
+					log.Printf("failed to insert report for vaers_id %s %v", r.VaersID, err)
 					continue
 				}
 			}
@@ -212,7 +218,7 @@ func (i CSVImporter) ReadReportsFile(summaryMap map[int64]*Summary) error {
 }
 
 // Parse symptoms file, insert into symptoms table, lookup categories for symptom and populate Symptoms in summary map
-func (i *CSVImporter) ReadSymptomsFile(vaccineMap map[int64]bool, summaryMap map[int64]*Summary) (map[string]int, error) {
+func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64]bool, summaryMap map[int64]*Summary) (map[string]int, error) {
 	csvFile, err := os.Open(i.SymptomsFilePath)
 	if err != nil {
 		log.Printf("failed to open symptoms csv file: %v", err)
@@ -260,9 +266,9 @@ func (i *CSVImporter) ReadSymptomsFile(vaccineMap map[int64]bool, summaryMap map
 						symptom.Alias = a
 					}
 
-					sID, err := i.DBClient.InsertSymptom(symptom)
+					sID, err := i.DBClient.InsertSymptom(ctx, symptom)
 					if err != nil {
-						log.Printf("failed to insert symptom %s for vaers_id %s, skipping row", s, line[0])
+						log.Printf("failed to insert symptom %s for vaers_id %s, skipping row %v", s, line[0], err)
 						continue
 					}
 					symptom.ID = sID
@@ -280,7 +286,7 @@ func (i *CSVImporter) ReadSymptomsFile(vaccineMap map[int64]bool, summaryMap map
 
 					var categoryIDs []int
 					for _, c := range categories {
-						cID, err := i.DBClient.GetCategoryID(c)
+						cID, err := i.DBClient.GetCategoryID(ctx, c)
 						if err != nil {
 							log.Printf("failed to fetch category ID for category %s", c)
 						}

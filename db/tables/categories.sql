@@ -14,7 +14,7 @@ CREATE TABLE categories(
 );
 
 INSERT INTO categories (name) VALUES ('flu-like');
-INSERT INTO categories (name) VALUES ('gi');
+INSERT INTO categories (name) VALUES ('gastrointestinal');
 INSERT INTO categories (name) VALUES ('psychological');
 INSERT INTO categories (name) VALUES ('life threatening');
 INSERT INTO categories (name) VALUES ('skin & localized to injection site');
