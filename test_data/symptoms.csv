@@ -5,3 +5,7 @@ VAERS_ID,SYMPTOM1,SYMPTOMVERSION1,SYMPTOM2,SYMPTOMVERSION2,SYMPTOM3,SYMPTOMVERSI
 0916603,Dizziness,23.10,Fatigue,23.10,Mobility decreased,23.10,,,,
 0916604,Injection site erythema,23.10,Injection site pruritus,23.10,Injection site swelling,23.10,Injection site warmth,23.10,,
 0916606,Pharyngeal swelling,23.10,,,,,,,,
+0916607,Nausea,23.10,Fatigue,23.10,Diarrhoea,23.10,,,,
+0916608,Death,23.10,Fatigue,23.10,,,,,,
+0916610,Pulmonary embolism,23.10,Insomnia,23.10,Migraine,23.10,,,,
+0916611,Somnolence,23.10,Fatigue,23.10,Sleep disorder,23.10,,,,
