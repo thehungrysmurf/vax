@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -13,6 +15,8 @@ type Store interface {
 	InsertSymptomsCategories(symID int, catID int64)
 	GetVaccineID(ctx context.Context, v Vaccine) (int, error)
 	GetCategoryID(cat string) (int, error)
+	GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error)
+	GetFilteredResults(ctx context.Context, sex string, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error)
 }
 
 type DB struct {
@@ -75,7 +79,12 @@ func(d *DB) GetCategoryID(ctx context.Context, cat string) (int, error) {
 	return id, err
 }
 
-const SelectReportsPerVaccine = `SELECT c.name, count(ps.vaers_id) FROM categories c
+type SymptomCount struct {
+	Category string `db:"category"`
+	Count int64 `db:"count"`
+}
+
+const SelectSymptomCountsQuery = `SELECT c.name as category, count(ps.vaers_id) as count FROM categories c
 JOIN symptoms_categories sc ON c.id = sc.category_id
 JOIN symptoms s ON s.id = sc.symptom_id
 JOIN people_symptoms ps ON ps.symptom_id = s.id
@@ -83,41 +92,64 @@ JOIN vaccines v ON v.id = ps.vaccine_id
 WHERE v.manufacturer = $1
 GROUP BY c.name;`
 
-func(d *DB) GetVaccineReports(ctx context.Context, manufacturer Manufacturer) error {
-	return nil
+// For vaccine X, get me the count of all the people who reported symptoms under each category in the categories table
+func(d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
+	var counts []SymptomCount
+	rows, err := d.conn.Query(ctx, SelectSymptomCountsQuery, manufacturer)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		sc := SymptomCount{}
+		if err := rows.Scan(&sc.Category, &sc.Count); err != nil {
+			return nil, fmt.Errorf("failed to scan result: %v", err)
+		}
+		counts = append(counts, sc)
+	}
+
+	log.Printf("counts: %#+v", counts)
+	return counts, nil
 }
 
-/* vaccine page
-For vaccine X, get me the count of all the people who reported symptoms under each category in the categories table:
+type FilteredResult struct {
+	Age int `db:"age"`
+	Notes []string `db:"notes"`
+	Symptoms []string `db:"symptoms"`
+}
 
-select c.name, count(ps.vaers_id) from categories c
-join symptoms_categories sc on c.id = sc.category_id
-join symptoms s on s.id = sc.symptom_id
-join people_symptoms ps on ps.symptom_id = s.id
-join vaccines v on v.id = ps.vaccine_id
-where v.manufacturer = 'pfizer'
-group by c.name;
-*/
+// TODO add reported_at to results?
+const SelectFilteredResults = `SELECT p.age as age, json_agg(DISTINCT p.notes) as notes, json_agg(s.name) as symptoms FROM people p
+JOIN people_symptoms ps ON p.vaers_id = ps.vaers_id
+JOIN symptoms s ON s.id = ps.symptom_id
+JOIN symptoms_categories sc ON sc.symptom_id = s.id
+JOIN categories c ON c.id = sc.category_id
+JOIN vaccines v ON v.id = ps.vaccine_id
+WHERE p.sex = $1 
+AND p.age BETWEEN $2 AND $3 
+AND v.manufacturer = $4
+AND c.name = $5
+GROUP BY p.age
+ORDER BY p.age;
+`
 
-/* results page
-table with: date of report, symptom, notes, for vaccine X, category Y, age Z, sex T
+func(d *DB) GetFilteredResults(ctx context.Context, sex string, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error) {
+	var results []FilteredResult
+	rows, err := d.conn.Query(ctx, SelectFilteredResults, sex, ageFloor, ageCeiling, manufacturer, categoryName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-select p.reported_at, p.notes, JSONARRAYTHING(s.name) from people p
-join people_symptoms ps on p.vaers_id = ps.vaers_id
-join symptoms s on s.id = ps.symptom_id
-join symptoms_categories sc on sc.symptom_id = s.id
-join categories c on c.id = sc.category_id
-join vaccines v on v.id = ps.vaccine_id
-where p.sex = X and p.age between Y and Z and v.manufacturer = F and c.name = K
-order by p.age;
+	for rows.Next() {
+		fr := FilteredResult{}
+		if err := rows.Scan(&fr.Age, &fr.Notes, &fr.Symptoms); err != nil {
+			return nil, fmt.Errorf("failed to scan result: %v", err)
+		}
+		results = append(results, fr)
+	}
 
- */
-
-/*
-how many people experienced symptoms from category X, group by vaccine manufacturer?
-how many men experienced symptoms from category X, group by vaccine manufacturer?
-how many women between 30 and 50 experienced symptoms from category X, group by vaccine manufacturer?
-
-how many people experienced symptom Y from category X, group by vaccine manufacturer?
-give me the notes for all the men between 60 and 70 who experienced symptom Z, from vaccine manufacturer X.
- */
+	log.Printf("results: %#+v", results)
+	return results, nil
+}

@@ -1,0 +1,35 @@
+moderna
+----
+Dysphagia - GI F
+Epiglottitis - n/a
+Anxiety - psych F
+Dyspnoea - flu-like, cardiovascular F
+Injection site erythema - skin& F
+Injection site pruritus - skin& F
+Injection site swelling - skin& F
+Injection site warmth - skin& F
+Pulmonary embolism - life threat M
+Insomnia - psych M
+Migraine - flu-like, nervous system M
+
+pfizer
+---
+Chest discomfort - cardiovascular F
+Dysphagia - GI F
+Pain in extremity - nervous system F
+Visual impairment - eyes F
+Pharyngeal swelling - flu-like F
+Death - life threat F
+Fatigue - flu-like F
+Somnolence - flu-like, psych M
+Fatigue - flu-like M
+Sleep disorder - psych M
+
+janssen
+---
+Dizziness - flu-like, nervous system F
+Fatigue - flu-like F
+Mobility decreased - muscles& F
+Nausea - GI M
+Fatigue - flu-like M
+Diarrhoea - GI M
