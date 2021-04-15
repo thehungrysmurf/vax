@@ -1,0 +1,8 @@
+<html>
+<h2>Summary for {{.Vaccine}} vaccine</h2>
+<ul>
+    {{range $count := .SymptomCounts}}
+    <li>{{$count.Category}}: {{$count.Count}}</li>
+    {{end}}
+</ul>
+</html>

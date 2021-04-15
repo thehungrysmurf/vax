@@ -68,6 +68,19 @@ func(m *Manufacturer) FromString(s string) Manufacturer {
 	}
 }
 
+func(m *Manufacturer) String() string {
+	switch *m {
+	case Moderna:
+		return "Moderna"
+	case Pfizer:
+		return "Pfizer"
+	case Janssen:
+		return "Johnson & Johnson"
+	default:
+		return "Unknown"
+	}
+}
+
 type Vaccine struct {
 	Illness Illness
 	Manufacturer Manufacturer
