@@ -1,8 +1,9 @@
 package config
 
 type Config struct {
-	SymptomsFilePath string `env:",default=/Users/thesmurf/go/src/github.com/thehungrysmurf/vax/test_data/symptoms.csv"`
-	VaccinesFilePath string `env:",default=/Users/thesmurf/go/src/github.com/thehungrysmurf/vax/test_data/vaccines.csv"`
-	ReportsFilePath string `env:",default=/Users/thesmurf/go/src/github.com/thehungrysmurf/vax/test_data/reports.csv"`
-	DatabaseURI string `env:",default=postgres://thesmurf:@localhost:5432/vax"`
+	SymptomsFilePath string `env:"SYMPTOMS_FILE_PATH,required"`
+	VaccinesFilePath string `env:"VACCINES_FILE_PATH,required"`
+	ReportsFilePath string `env:"REPORTS_FILE_PATH,required"`
+	VaccinationTotalsFilePath string `env:"VACCINATION_TOTALS_FILE_PATH,required"`
+	DatabaseURI string `env:"DB_URI,required"`
 }

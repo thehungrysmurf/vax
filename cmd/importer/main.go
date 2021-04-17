@@ -22,12 +22,12 @@ func main() {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, cfg.DatabaseURI)
 	if err != nil {
-		log.Fatal("failed to connect to database")
+		log.Fatalf("failed to connect to database: %v", err)
 	}
 
 	dbClient := store.NewDB(conn)
 
-	dataImporter := data.NewCSVImporter(cfg.ReportsFilePath, cfg.VaccinesFilePath, cfg.SymptomsFilePath, dbClient)
+	dataImporter := data.NewCSVImporter(cfg.VaccinationTotalsFilePath, cfg.ReportsFilePath, cfg.VaccinesFilePath, cfg.SymptomsFilePath, dbClient)
 	if err := dataImporter.Run(); err != nil {
 		log.Fatalf("failed to import data: %v", err)
 	}

@@ -34,11 +34,22 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi"))
+		w.Write([]byte("salud"))
+	})
+
+	r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
+		totals, err := dbClient.GetVaccinationTotals(ctx)
+		if err != nil {
+			fmt.Fprintf(w, "failed to get vaccination totals %v", err)
+		}
+
+		fmt.Fprintf(w, "Totals - Pfizer: %v, Moderna: %v, Janssen: %v", totals.Pfizer, totals.Moderna, totals.Janssen)
 	})
 
 	r.Get("/vaccine/{vaccine}", func(w http.ResponseWriter, r *http.Request) {
-		vaccine := store.Manufacturer(chi.URLParam(r, "vaccine"))
+		var m store.Manufacturer
+		vaccine := m.FromString(chi.URLParam(r, "vaccine"))
+
 		counts, err := dbClient.GetSymptomCounts(ctx, vaccine)
 		if err != nil {
 			fmt.Fprintf(w, "failed to get symptoms %v", err)
@@ -59,21 +70,27 @@ func main() {
 		}
 	})
 
-	// TODO turn params into store types
+	// TODO return graceful web msg when err != nil in this handler
 	r.Get("/vaccine/{vaccine}/category/{name}/{sex}/{agemin}/{agemax}", func(w http.ResponseWriter, r *http.Request) {
-		vaccine := store.Manufacturer(chi.URLParam(r, "vaccine"))
-		category := chi.URLParam(r, "name")
-		sex := chi.URLParam(r, "sex")
+		var s store.Sex
+		sex := s.FromString(chi.URLParam(r, "sex"))
+
 		ageMin := chi.URLParam(r, "agemin")
 		ageFloor, err := strconv.ParseInt(ageMin, 10, 32)
 		if err != nil {
-			fmt.Fprintf(w, "failed to convert age min to int %v", err)
+			fmt.Fprintf(w, "failed to convert age min to int: %v", err)
 		}
+
 		ageMax := chi.URLParam(r, "agemax")
 		ageCeil, err := strconv.ParseInt(ageMax, 10, 32)
 		if err != nil {
-			fmt.Fprintf(w, "failed to convert age min to int %v", err)
+			fmt.Fprintf(w, "failed to convert age min to int: %v", err)
 		}
+
+		var m store.Manufacturer
+		vaccine := m.FromString(chi.URLParam(r, "vaccine"))
+
+		category := chi.URLParam(r, "name")
 
 		results, err := dbClient.GetFilteredResults(ctx, sex, int(ageFloor), int(ageCeil), vaccine, category)
 		if err != nil {
@@ -87,9 +104,9 @@ func main() {
 
 		ret := ResultsPage{
 			Vaccine:    vaccine.String(),
-			AgeFloor:  int(ageFloor),
-			AgeCeiling: int(ageCeil),
-			Sex:        sex,
+			AgeMin:  int(ageFloor),
+			AgeMax: int(ageCeil),
+			Sex:        sex.String(),
 			Results:    results,
 		}
 
@@ -110,8 +127,14 @@ type VaccinePage struct {
 
 type ResultsPage struct {
 	Vaccine string
-	AgeFloor int
-	AgeCeiling int
+	AgeMin int
+	AgeMax int
 	Sex string
 	Results []store.FilteredResult
+}
+
+type IndexPage struct {
+	Pfizer int64
+	Moderna int64
+	Janssen int64
 }

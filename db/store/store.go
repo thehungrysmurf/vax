@@ -4,29 +4,53 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v4"
 )
 
 type Store interface {
-	InsertReport(r Report) (int64, error)
-	InsertSymptom(s Symptom) (int64, error)
-	InsertPeopleSymptoms(vaxID int, symID int64)
-	InsertSymptomsCategories(symID int, catID int64)
+	InsertVaccinationTotals(ctx context.Context, totals VaccinationTotals) error
+	InsertReport(ctx context.Context, r Report) (int64, error)
+	InsertSymptom(ctx context.Context, s Symptom) (int64, error)
+	InsertPeopleSymptoms(ctx context.Context, vaxID int, symID int64)
+	InsertSymptomsCategories(ctx context.Context, symID int, catID int64)
+	GetVaccinationTotals(ctx context.Context) (VaccinationTotals, error)
 	GetVaccineID(ctx context.Context, v Vaccine) (int, error)
-	GetCategoryID(cat string) (int, error)
+	GetCategoryID(ctx context.Context, cat string) (int, error)
 	GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error)
-	GetFilteredResults(ctx context.Context, sex string, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error)
+	GetFilteredResults(ctx context.Context, sex Sex, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error)
 }
 
 type DB struct {
 	conn *pgx.Conn
 }
 
+type VaccinationTotals struct {
+	Pfizer int64
+	Moderna int64
+	Janssen int64
+}
+
 func NewDB(conn *pgx.Conn) *DB {
 	return &DB{
 		conn: conn,
 	}
+}
+
+const InsertVaccinationTotalsQuery = `INSERT INTO vaccination_totals (pfizer, moderna, janssen, updated_at) values ($1, $2, $3, $4)`
+
+func(d *DB) InsertVaccinationTotals(ctx context.Context, totals VaccinationTotals) error {
+	_, err := d.conn.Exec(ctx, InsertVaccinationTotalsQuery, totals.Pfizer, totals.Moderna, totals.Janssen, time.Now())
+	return err
+}
+
+const SelectVaccinationTotalsQuery = `SELECT pfizer, moderna, janssen FROM vaccination_totals ORDER BY updated_at DESC LIMIT 1`
+
+func(d *DB) GetVaccinationTotals(ctx context.Context) (VaccinationTotals, error) {
+	var vt VaccinationTotals
+	err := d.conn.QueryRow(ctx, SelectVaccinationTotalsQuery).Scan(&vt.Pfizer, &vt.Moderna, &vt.Janssen)
+	return vt, err
 }
 
 const InsertReportQuery = `INSERT INTO people (vaers_id, age, sex, notes, reported_at) VALUES ($1, $2, $3, $4, $5);`
@@ -134,9 +158,9 @@ GROUP BY p.age
 ORDER BY p.age;
 `
 
-func(d *DB) GetFilteredResults(ctx context.Context, sex string, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error) {
+func(d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int, manufacturer Manufacturer, category string) ([]FilteredResult, error) {
 	var results []FilteredResult
-	rows, err := d.conn.Query(ctx, SelectFilteredResults, sex, ageFloor, ageCeiling, manufacturer, categoryName)
+	rows, err := d.conn.Query(ctx, SelectFilteredResults, sex, ageMin, ageMax, manufacturer, category)
 	if err != nil {
 		return nil, err
 	}

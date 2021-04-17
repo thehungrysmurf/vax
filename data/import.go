@@ -20,12 +20,14 @@ const Covid19 = "covid19"
 
 type Importer interface {
 	Run() error
+	ReadVaccinationTotalsFile() error
 	ReadReportsFile() error
 	ReadVaccinesFile() (map[int64]bool, error)
 	ReadSymptomsFile() (map[string]int, error)
 }
 
 type CSVImporter struct {
+	VaccinationTotalsFilePath string
 	ReportsFilePath string
 	VaccinesFilePath string
 	SymptomsFilePath string
@@ -37,8 +39,9 @@ type Summary struct {
 	VaccineID int
 }
 
-func NewCSVImporter(reportsFilePath, vaccinesFilePath, symptomsFilePath string, dbClient *store.DB) CSVImporter {
+func NewCSVImporter(vaccinationTotalsFilePath, reportsFilePath, vaccinesFilePath, symptomsFilePath string, dbClient *store.DB) CSVImporter {
 	return CSVImporter{
+		VaccinationTotalsFilePath: vaccinationTotalsFilePath,
 		ReportsFilePath:  reportsFilePath,
 		VaccinesFilePath: vaccinesFilePath,
 		SymptomsFilePath: symptomsFilePath,
@@ -49,6 +52,12 @@ func NewCSVImporter(reportsFilePath, vaccinesFilePath, symptomsFilePath string, 
 func (i CSVImporter) Run() error {
 	summaryMap := map[int64]*Summary{}
 	ctx := context.Background()
+
+	err := i.ReadVaccinationTotalsFile(ctx)
+	if err != nil {
+		log.Fatalf("failed to read vaccination totals file: %v", err)
+		return err
+	}
 
 	vaccineMap, err := i.ReadVaccinesFile(ctx, summaryMap)
 	if err != nil {
@@ -61,12 +70,19 @@ func (i CSVImporter) Run() error {
 		return err
 	}
 
-	if _, err = i.ReadSymptomsFile(ctx, vaccineMap, summaryMap); err != nil {
+	symptomsMap, err := i.ReadSymptomsFile(ctx, vaccineMap, summaryMap)
+	if err != nil {
 		log.Fatalf("failed to read symptoms file: %v", err)
 		return err
 	}
 
-	// TODO alert if any symptoms with count 50+ are not in category map
+	for s, count := range symptomsMap {
+		if count >= 50 {
+			if _, ok := categoriesMap[s]; !ok {
+				log.Printf("!! symptom %s has been reported %v times and needs to be categorized !!", s, count)
+			}
+		}
+	}
 
 	for id, s := range summaryMap {
 		log.Printf("complete summary map, vaersID: %v, summary: %+v", id, *s)
@@ -89,6 +105,68 @@ func (i CSVImporter) Run() error {
 		}
 	}
 
+	return nil
+}
+
+// Parse vaccination totals file, insert into vaccination_totals table
+func (i CSVImporter) ReadVaccinationTotalsFile(ctx context.Context) error {
+	csvFile, err := os.Open(i.VaccinationTotalsFilePath)
+	if err != nil {
+		log.Printf("failed to open csv vaccination totals file: %v", err)
+		return err
+	}
+
+	reader := csv.NewReader(bufio.NewReader(csvFile))
+	linesRead := 0
+	var vaxTotal store.VaccinationTotals
+
+	for {
+		line, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Printf("failed to read from vaccination totals csv file: %v", err)
+			return err
+		}
+		linesRead++
+
+		if linesRead > 1 {
+			if line[0] == "United States" {
+				if line[2] == `Pfizer/BioNTech` {
+					pfizerTotal, err := strconv.ParseInt(line[3], 10, 64)
+					if err != nil {
+						log.Printf("failed to convert pfizer count %s to int: %v", line[0], err)
+						continue
+					}
+					vaxTotal.Pfizer = pfizerTotal
+				}
+
+				if line[2] == "Moderna" {
+					modernaTotal, err := strconv.ParseInt(line[3], 10, 64)
+					if err != nil {
+						log.Printf("failed to convert moderna count %s to int: %v", line[0], err)
+						continue
+					}
+					vaxTotal.Moderna = modernaTotal
+				}
+
+				if line[2] == "Johnson&Johnson" {
+					janssenTotal, err := strconv.ParseInt(line[3], 10, 64)
+					if err != nil {
+						log.Printf("failed to convert j&j count %s to int: %v", line[0], err)
+						continue
+					}
+					vaxTotal.Janssen = janssenTotal
+				}
+			}
+		}
+	}
+
+	if err := i.DBClient.InsertVaccinationTotals(ctx, vaxTotal); err != nil {
+		log.Printf("failed to insert latest vaccination totals: %v", err)
+	}
+
+	log.Printf("finished reading vaccination totals file, read %d lines", linesRead)
 	return nil
 }
 

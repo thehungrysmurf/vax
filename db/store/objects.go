@@ -8,7 +8,7 @@ import (
 type Sex string
 
 const(
-	UnknownGender Sex = "U"
+	UnknownSex Sex = "U"
 	Male = "M"
 	Female = "F"
 )
@@ -20,7 +20,18 @@ func(s *Sex) FromString(str string) Sex {
 	case "F":
 		return Female
 	default:
-		return UnknownGender
+		return UnknownSex
+	}
+}
+
+func(s *Sex) String() string {
+	switch *s {
+	case Male:
+		return "Male"
+	case Female:
+		return "Female"
+	default:
+		return "Unknown"
 	}
 }
 
