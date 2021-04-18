@@ -16,13 +16,13 @@ CREATE TABLE categories(
         DEFAULT NOW()
 );
 
-INSERT INTO categories (name, slug) VALUES ('flu-like', 'flu-like');
-INSERT INTO categories (name, slug) VALUES ('gastrointestinal', 'gastrointestinal');
-INSERT INTO categories (name, slug) VALUES ('psychological', 'psychological');
-INSERT INTO categories (name, slug) VALUES ('life threatening', 'life-threatening');
-INSERT INTO categories (name, slug) VALUES ('skin & localized to injection site', 'skin-and-localized-to-injection-site');
-INSERT INTO categories (name, slug) VALUES ('muscles & bones', 'muscles-and-bones');
-INSERT INTO categories (name, slug) VALUES ('allergic', 'allergic');
-INSERT INTO categories (name, slug) VALUES ('nervous system', 'nervous-system');
-INSERT INTO categories (name, slug) VALUES ('cardiovascular', 'cardiovascular');
-INSERT INTO categories (name, slug) VALUES ('eyes, mouth & ears', 'eyes-mouth-and-ears');
+INSERT INTO categories (name, slug) VALUES ('Flu-like', 'flu-like');
+INSERT INTO categories (name, slug) VALUES ('Gastrointestinal', 'gastrointestinal');
+INSERT INTO categories (name, slug) VALUES ('Psychological', 'psychological');
+INSERT INTO categories (name, slug) VALUES ('Life threatening', 'life-threatening');
+INSERT INTO categories (name, slug) VALUES ('Skin & localized to injection site', 'skin-and-localized-to-injection-site');
+INSERT INTO categories (name, slug) VALUES ('Muscles & bones', 'muscles-and-bones');
+INSERT INTO categories (name, slug) VALUES ('Allergic', 'allergic');
+INSERT INTO categories (name, slug) VALUES ('Nervous system', 'nervous-system');
+INSERT INTO categories (name, slug) VALUES ('Cardiovascular', 'cardiovascular');
+INSERT INTO categories (name, slug) VALUES ('Eyes, mouth & ears', 'eyes-mouth-and-ears');
