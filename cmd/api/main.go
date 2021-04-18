@@ -64,7 +64,8 @@ func main() {
 	})
 
 	r.Get("/vaccine/{vaccine}", func(w http.ResponseWriter, r *http.Request) {
-		vaccine := store.ManufacturerFromString(chi.URLParam(r, "vaccine"))
+		vaccineSlug := chi.URLParam(r, "vaccine")
+		vaccine := store.ManufacturerFromString(vaccineSlug)
 
 		counts, err := dbClient.GetSymptomCounts(ctx, vaccine)
 		if err != nil {
@@ -80,6 +81,7 @@ func main() {
 			IsOverview:    true,
 			PageTitle:     vaccine.String(),
 			Vaccine:       vaccine.String(),
+			VaccineSlug: vaccineSlug,
 			SymptomCounts: counts,
 		}
 
@@ -104,7 +106,8 @@ func main() {
 			fmt.Fprintf(w, "failed to convert age min to int: %v", err)
 		}
 
-		vaccine := store.ManufacturerFromString(chi.URLParam(r, "vaccine"))
+		vaccineSlug := chi.URLParam(r, "vaccine")
+		vaccine := store.ManufacturerFromString(vaccineSlug)
 
 		categorySlug := chi.URLParam(r, "name")
 		categoryName, err := dbClient.GetCategoryName(ctx, categorySlug)
@@ -117,7 +120,7 @@ func main() {
 			fmt.Fprintf(w, "failed to get symptoms %v", err)
 		}
 
-		results, err := dbClient.GetFilteredResults(ctx, sex, int(ageFloor), int(ageCeil), vaccine, categorySlug)
+		results, err := dbClient.GetFilteredResults(ctx, sex, int(ageFloor), int(ageCeil), vaccine, categoryName)
 		if err != nil {
 			fmt.Fprintf(w, "failed to get results %v", err)
 		}
@@ -130,6 +133,7 @@ func main() {
 		ret := VaccinePage{
 			PageTitle:     vaccine.String(),
 			Vaccine:       vaccine.String(),
+			VaccineSlug: vaccineSlug,
 			SymptomCounts: counts,
 			ResultsPage: ResultsPage{
 				Vaccine:         vaccine.String(),
@@ -155,6 +159,7 @@ type VaccinePage struct {
 	IsOverview    bool
 	PageTitle     string
 	Vaccine       string
+	VaccineSlug string
 	SymptomCounts []store.SymptomCount
 	ResultsPage   ResultsPage
 }

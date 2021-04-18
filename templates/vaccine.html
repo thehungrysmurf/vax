@@ -94,7 +94,7 @@
                         <nav class="toc">
                             <header><h4 class="nav__title">Symptoms reported</h4></header>
                             <ul class="toc__menu">
-                                {{$vaccine := .Vaccine}}
+                                {{$vaccine := .VaccineSlug}}
                                 {{range $sc := .SymptomCounts}}
                                 <li>
                                     <a href="#" class="category-toggle">{{$sc.Category}} reports: {{$sc.Count}}</a>
