@@ -1,8 +1,183 @@
-<html>
-<h2>Summary for {{.Vaccine}} vaccine</h2>
-<ul>
-    {{range $count := .SymptomCounts}}
-    <li>{{$count.Category}}: {{$count.Count}}</li>
-    {{end}}
-</ul>
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <title>Layouts - Minimal Mistakes</title>
+    <meta name="description" content="Descriptions and samples of all layouts included with the theme and how to best use them.">
+    <meta name="author" content="Michael Rose">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+    </script>
+
+    <!-- For all browsers -->
+    <link rel="stylesheet" href="https://mmistakes.github.io/minimal-mistakes/assets/css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+    <style>
+        .full-width {
+            width: 100%;
+        }
+    </style>
+    <!--[if IE]>
+    <style>
+        /* old IE unsupported flexbox fixes */
+        .greedy-nav .site-title {
+            padding-right: 3em;
+        }
+        .greedy-nav button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+        }
+    </style>
+    <![endif]-->
+</head>
+
+<body class="layout--single">
+<nav class="skip-links">
+    <h2 class="screen-reader-text">Skip links</h2>
+    <ul>
+        <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+        <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+        <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+    </ul>
+</nav>
+
+<!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+<div class="masthead">
+    <div class="masthead__inner-wrap">
+        <div class="masthead__menu">
+            <nav id="site-nav" class="greedy-nav">
+                <a class="site-title" href="/">
+                    $VAX_SITE_NAME
+                    <span class="site-subtitle">$VAX_SUBTITLE</span>
+                </a>
+                <ul class="visible-links">
+                    <!-- Some ideas of links to have. Maybe just Home and About
+                       - Home
+                        - Pfizer
+                        - Moderna
+                        - Johnson & Johnson
+                        - About
+                    -->
+                    <li class="masthead__menu-item">
+                        <a href="$LINK_URL">$LINK_NAME</a>
+                    </li>
+                </ul>
+                <button class="greedy-nav__toggle hidden" type="button">
+                    <span class="visually-hidden">Toggle menu</span>
+                    <div class="navicon"></div>
+                </button>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="initial-content">
+    <div id="main" role="main">
+        <article class="page full-width">
+            <div class="page__inner-wrap">
+                <header>
+                    <h1 id="page-title" class="page__title" itemprop="headline">$PAGE_TITLE</h1>
+                </header>
+                <section class="page__content" itemprop="text">
+                    <aside class="sidebar__right ">
+                        <nav class="toc">
+                            <header><h4 class="nav__title">$LIST_TITLE</h4></header>
+                            <ul class="toc__menu">
+                                <!-- Range over categories -->
+                                <li>
+                                    <a href="#">$CATEGORY_NAME ($SYMPTOM_COUNT)</a>
+                                    <ul>
+                                        <!-- Range over sex/age min/max -->
+                                        <li><a href="#">$SEX_AGE_RANGE</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+
+                        </nav>
+                    </aside>
+
+                    <!-- Optional opening text. May be good to describe what the results page is -->
+                    <p>The bread and butter of any theme. Below you’ll find the layouts included with Minimal Mistakes, what they look like and the type of content they’ve been built for.</p>
+
+                    <h2 id="default-layout">Default layout</h2>
+                    <p>The base layout all other layouts inherit from. There’s not much to this layout apart from pulling in several <code class="language-plaintext highlighter-rouge">_includes</code>:</p>
+
+                    <!-- Warning style message -->
+                    <p class="notice--warning">
+                        <strong>Note:</strong>
+                        You won’t ever assign this layout directly to a post or page. Instead all other layouts will build off of it by setting
+                    </p>
+                    <!-- Danger style message -->
+                    <p class="notice--danger">
+                        <strong>Note:</strong>
+                        Has been known to mangle markup and break JavaScript… especially if inline
+                    </p>
+
+                    <!-- Notice style message -->
+                    <p class="notice--info">
+                        <strong>Note:</strong>
+                        If the page contains a table of contents, it will no longer appear to the right. Instead it will be forced into the main content container directly following the page’s title.
+                    </p>
+
+                    <h3 id="table-of-contents">Table of contents</h3>
+
+                    <p>Auto-generated table of contents list for your posts and pages can be enabled by adding</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>$HEADER_1</th>
+                                <th>$HEADER_2</th>
+                                <th>$HEADER_3</th>
+                                <th>$HEADER_4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Range over results -->
+                            <tr>
+                                <!-- The first td is strong/bold just to show how to do it -->
+                                <td><strong>$DATA_1</strong></td>
+                                <td>$DATA_2</td>
+                                <td>$DATA_3</td>
+                                <td>$DATA_4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <footer class="page__meta">
+                    <!-- Could be nice to say when the page was last generated since new reports come in -->
+                    <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-08-30">August 30, 2020</time></p>
+                </footer>
+            </div>
+        </article>
+    </div>
+</div>
+
+<div class="page__footer">
+    <footer>
+        <div class="page__footer-follow">
+            <ul class="social-icons">
+                <li><a href="https://twitter.com/mmistakes" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+                <li><a href="https://github.com/mmistakes" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+                <li><a href="https://instagram.com/mmistakes" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-instagram" aria-hidden="true"></i> Instagram</a></li>
+            </ul>
+        </div>
+        <div class="page__footer-copyright">
+            <!-- If you want to copyright something -->
+            &copy;2021
+        </div>
+    </footer>
+</div>
+</body>
 </html>
