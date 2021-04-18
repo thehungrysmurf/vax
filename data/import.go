@@ -28,24 +28,24 @@ type Importer interface {
 
 type CSVImporter struct {
 	VaccinationTotalsFilePath string
-	ReportsFilePath string
-	VaccinesFilePath string
-	SymptomsFilePath string
-	DBClient *store.DB
+	ReportsFilePath           string
+	VaccinesFilePath          string
+	SymptomsFilePath          string
+	DBClient                  *store.DB
 }
 
 type Summary struct {
-	Symptoms []store.Symptom
+	Symptoms  []store.Symptom
 	VaccineID int
 }
 
 func NewCSVImporter(vaccinationTotalsFilePath, reportsFilePath, vaccinesFilePath, symptomsFilePath string, dbClient *store.DB) CSVImporter {
 	return CSVImporter{
 		VaccinationTotalsFilePath: vaccinationTotalsFilePath,
-		ReportsFilePath:  reportsFilePath,
-		VaccinesFilePath: vaccinesFilePath,
-		SymptomsFilePath: symptomsFilePath,
-		DBClient: dbClient,
+		ReportsFilePath:           reportsFilePath,
+		VaccinesFilePath:          vaccinesFilePath,
+		SymptomsFilePath:          symptomsFilePath,
+		DBClient:                  dbClient,
 	}
 }
 
@@ -96,7 +96,7 @@ func (i CSVImporter) Run() error {
 				continue
 			}
 
-			for _, cID:= range symptom.CategoryIDs {
+			for _, cID := range symptom.CategoryIDs {
 				if err := i.DBClient.InsertSymptomCategory(ctx, symptom.ID, cID); err != nil {
 					log.Printf("failed to insert symptoms categories row for vaers_id: %v, symptom_id: %v, category_id: %v %v", vaersID, symptom.ID, cID, err)
 					continue
@@ -201,8 +201,7 @@ func (i CSVImporter) ReadVaccinesFile(ctx context.Context, summaryMap map[int64]
 				}
 				vaccineMap[id] = true
 
-				var manufacturer store.Manufacturer
-				manufacturer = manufacturer.FromString(line[2])
+				manufacturer := store.ManufacturerFromString(line[2])
 				v := store.Vaccine{
 					Illness:      Covid19,
 					Manufacturer: manufacturer,
@@ -274,11 +273,10 @@ func (i CSVImporter) ReadReportsFile(ctx context.Context, summaryMap map[int64]*
 					continue
 				}
 
-				var s store.Sex
 				r := store.Report{
 					VaersID:    vaersID,
 					Age:        int(age),
-					Sex:     s.FromString(line[6]),
+					Sex:        store.SexFromString(line[6]),
 					Notes:      line[8],
 					ReportedAt: reportedAt,
 				}
@@ -339,7 +337,7 @@ func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64
 						continue
 					}
 
-					symptom := store.Symptom{Name:  s}
+					symptom := store.Symptom{Name: s}
 					if a, ok := aliasesMap[s]; ok {
 						symptom.Alias = a
 					}

@@ -18,6 +18,7 @@ type Store interface {
 	GetVaccinationTotals(ctx context.Context) (VaccinationTotals, error)
 	GetVaccineID(ctx context.Context, v Vaccine) (int, error)
 	GetCategoryID(ctx context.Context, cat string) (int, error)
+	GetCategoryName(ctx context.Context, catSlug string) (string, error)
 	GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error)
 	GetFilteredResults(ctx context.Context, sex Sex, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error)
 }
@@ -27,7 +28,7 @@ type DB struct {
 }
 
 type VaccinationTotals struct {
-	Pfizer int64
+	Pfizer  int64
 	Moderna int64
 	Janssen int64
 }
@@ -40,14 +41,14 @@ func NewDB(conn *pgx.Conn) *DB {
 
 const InsertVaccinationTotalsQuery = `INSERT INTO vaccination_totals (pfizer, moderna, janssen, updated_at) values ($1, $2, $3, $4)`
 
-func(d *DB) InsertVaccinationTotals(ctx context.Context, totals VaccinationTotals) error {
+func (d *DB) InsertVaccinationTotals(ctx context.Context, totals VaccinationTotals) error {
 	_, err := d.conn.Exec(ctx, InsertVaccinationTotalsQuery, totals.Pfizer, totals.Moderna, totals.Janssen, time.Now())
 	return err
 }
 
 const SelectVaccinationTotalsQuery = `SELECT pfizer, moderna, janssen FROM vaccination_totals ORDER BY updated_at DESC LIMIT 1`
 
-func(d *DB) GetVaccinationTotals(ctx context.Context) (VaccinationTotals, error) {
+func (d *DB) GetVaccinationTotals(ctx context.Context) (VaccinationTotals, error) {
 	var vt VaccinationTotals
 	err := d.conn.QueryRow(ctx, SelectVaccinationTotalsQuery).Scan(&vt.Pfizer, &vt.Moderna, &vt.Janssen)
 	return vt, err
@@ -55,14 +56,14 @@ func(d *DB) GetVaccinationTotals(ctx context.Context) (VaccinationTotals, error)
 
 const InsertReportQuery = `INSERT INTO people (vaers_id, age, sex, notes, reported_at) VALUES ($1, $2, $3, $4, $5);`
 
-func(d *DB) InsertReport(ctx context.Context, r Report) error {
+func (d *DB) InsertReport(ctx context.Context, r Report) error {
 	_, err := d.conn.Exec(ctx, InsertReportQuery, r.VaersID, r.Age, r.Sex, r.Notes, r.ReportedAt)
 	return err
 }
 
 const SelectVaccineQuery = `SELECT id FROM vaccines WHERE illness = $1 AND manufacturer = $2;`
 
-func(d *DB) GetVaccineID(ctx context.Context, v Vaccine) (int, error) {
+func (d *DB) GetVaccineID(ctx context.Context, v Vaccine) (int, error) {
 	var id int
 	err := d.conn.QueryRow(ctx, SelectVaccineQuery, v.Illness, v.Manufacturer).Scan(&id)
 	return id, err
@@ -71,7 +72,7 @@ func(d *DB) GetVaccineID(ctx context.Context, v Vaccine) (int, error) {
 const SelectSymptomQuery = `SELECT id FROM symptoms WHERE name = $1`
 const InsertSymptomQuery = `INSERT INTO symptoms (name, alias) VALUES ($1, $2) RETURNING id;`
 
-func(d *DB) InsertSymptom(ctx context.Context, s Symptom) (int64, error) {
+func (d *DB) InsertSymptom(ctx context.Context, s Symptom) (int64, error) {
 	var id int64
 	err := d.conn.QueryRow(ctx, SelectSymptomQuery, s.Name).Scan(&id)
 	if err == pgx.ErrNoRows {
@@ -83,41 +84,50 @@ func(d *DB) InsertSymptom(ctx context.Context, s Symptom) (int64, error) {
 
 const InsertPeopleSymptomQuery = `INSERT INTO people_symptoms(vaers_id, symptom_id, vaccine_id) VALUES ($1, $2, $3);`
 
-func(d *DB) InsertPeopleSymptom(ctx context.Context, vaersID, symID int64, vaxID int) error {
+func (d *DB) InsertPeopleSymptom(ctx context.Context, vaersID, symID int64, vaxID int) error {
 	_, err := d.conn.Exec(ctx, InsertPeopleSymptomQuery, vaersID, symID, vaxID)
 	return err
 }
 
 const InsertSymptomCategoryQuery = `INSERT INTO symptoms_categories (symptom_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;`
 
-func(d *DB) InsertSymptomCategory(ctx context.Context, symID int64, catID int) error {
+func (d *DB) InsertSymptomCategory(ctx context.Context, symID int64, catID int) error {
 	_, err := d.conn.Exec(ctx, InsertSymptomCategoryQuery, symID, catID)
 	return err
 }
 
-const SelectCategoryQuery = `SELECT id FROM categories WHERE name = $1`
+const SelectCategoryIDQuery = `SELECT id FROM categories WHERE name = $1`
 
-func(d *DB) GetCategoryID(ctx context.Context, cat string) (int, error) {
+func (d *DB) GetCategoryID(ctx context.Context, cat string) (int, error) {
 	var id int
-	err := d.conn.QueryRow(ctx, SelectCategoryQuery, cat).Scan(&id)
+	err := d.conn.QueryRow(ctx, SelectCategoryIDQuery, cat).Scan(&id)
 	return id, err
 }
 
-type SymptomCount struct {
-	Category string `db:"category"`
-	Count int64 `db:"count"`
+const SelectCategoryNameQuery = `SELECT name FROM categories WHERE slug = $1`
+
+func (d *DB) GetCategoryName(ctx context.Context, catSlug string) (string, error) {
+	var name string
+	err := d.conn.QueryRow(ctx, SelectCategoryNameQuery, catSlug).Scan(&name)
+	return name, err
 }
 
-const SelectSymptomCountsQuery = `SELECT c.name as category, count(ps.vaers_id) as count FROM categories c
+type SymptomCount struct {
+	Category     string `db:"category"`
+	CategorySlug string `db:"slug"`
+	Count        int64  `db:"count"`
+}
+
+const SelectSymptomCountsQuery = `SELECT c.name as category, c.slug as slug, count(ps.vaers_id) as count FROM categories c
 JOIN symptoms_categories sc ON c.id = sc.category_id
 JOIN symptoms s ON s.id = sc.symptom_id
 JOIN people_symptoms ps ON ps.symptom_id = s.id
 JOIN vaccines v ON v.id = ps.vaccine_id
 WHERE v.manufacturer = $1
-GROUP BY c.name;`
+GROUP BY c.name, c.slug;`
 
 // For vaccine X, get me the count of all the people who reported symptoms under each category in the categories table
-func(d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
+func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
 	var counts []SymptomCount
 	rows, err := d.conn.Query(ctx, SelectSymptomCountsQuery, manufacturer)
 	if err != nil {
@@ -127,7 +137,7 @@ func(d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]
 
 	for rows.Next() {
 		sc := SymptomCount{}
-		if err := rows.Scan(&sc.Category, &sc.Count); err != nil {
+		if err := rows.Scan(&sc.Category, &sc.CategorySlug, &sc.Count); err != nil {
 			return nil, fmt.Errorf("failed to scan result: %v", err)
 		}
 		counts = append(counts, sc)
@@ -138,8 +148,8 @@ func(d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]
 }
 
 type FilteredResult struct {
-	Age int `db:"age"`
-	Notes []string `db:"notes"`
+	Age      int      `db:"age"`
+	Notes    string   `db:"notes"`
 	Symptoms []string `db:"symptoms"`
 }
 
@@ -158,7 +168,7 @@ GROUP BY p.age
 ORDER BY p.age;
 `
 
-func(d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int, manufacturer Manufacturer, category string) ([]FilteredResult, error) {
+func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int, manufacturer Manufacturer, category string) ([]FilteredResult, error) {
 	var results []FilteredResult
 	rows, err := d.conn.Query(ctx, SelectFilteredResults, sex, ageMin, ageMax, manufacturer, category)
 	if err != nil {
@@ -168,8 +178,12 @@ func(d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int,
 
 	for rows.Next() {
 		fr := FilteredResult{}
-		if err := rows.Scan(&fr.Age, &fr.Notes, &fr.Symptoms); err != nil {
+		var notes []string
+		if err := rows.Scan(&fr.Age, &notes, &fr.Symptoms); err != nil {
 			return nil, fmt.Errorf("failed to scan result: %v", err)
+		}
+		if len(notes) > 0 {
+			fr.Notes = notes[0]
 		}
 		results = append(results, fr)
 	}

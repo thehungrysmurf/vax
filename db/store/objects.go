@@ -7,24 +7,24 @@ import (
 
 type Sex string
 
-const(
+const (
 	UnknownSex Sex = "U"
-	Male = "M"
-	Female = "F"
+	Male           = "M"
+	Female         = "F"
 )
 
-func(s *Sex) FromString(str string) Sex {
+func SexFromString(str string) Sex {
 	switch str {
-	case "M":
+	case "M", "male":
 		return Male
-	case "F":
+	case "F", "female":
 		return Female
 	default:
 		return UnknownSex
 	}
 }
 
-func(s *Sex) String() string {
+func (s *Sex) String() string {
 	switch *s {
 	case Male:
 		return "Male"
@@ -36,50 +36,50 @@ func(s *Sex) String() string {
 }
 
 type Report struct {
-	VaersID int64
-	Age int
-	Sex Sex
-	Notes string
+	VaersID    int64
+	Age        int
+	Sex        Sex
+	Notes      string
 	ReportedAt time.Time
 }
 
 type Symptom struct {
-	ID int64
-	Name string
-	Alias string
+	ID          int64
+	Name        string
+	Alias       string
 	CategoryIDs []int
 }
 
 type Illness string
 
-const(
+const (
 	UnknownIllness Illness = "unknown"
-	Covid19 = "covid19"
+	Covid19                = "covid19"
 )
 
 type Manufacturer string
 
-const(
+const (
 	UnknownManufacturer Manufacturer = "unknown"
-	Moderna = "moderna"
-	Pfizer = "pfizer"
-	Janssen = "janssen"
+	Moderna                          = "moderna"
+	Pfizer                           = "pfizer"
+	Janssen                          = "janssen"
 )
 
-func(m *Manufacturer) FromString(s string) Manufacturer {
+func ManufacturerFromString(s string) Manufacturer {
 	switch strings.ToLower(s) {
-		case "moderna":
-			return Moderna
-		case `pfizer\biontech`:
-			return Pfizer
-		case "janssen":
-			return Janssen
-		default:
-			return UnknownManufacturer
+	case "moderna":
+		return Moderna
+	case `pfizer\biontech`, "pfizer":
+		return Pfizer
+	case "janssen":
+		return Janssen
+	default:
+		return UnknownManufacturer
 	}
 }
 
-func(m *Manufacturer) String() string {
+func (m *Manufacturer) String() string {
 	switch *m {
 	case Moderna:
 		return "Moderna"
@@ -93,11 +93,11 @@ func(m *Manufacturer) String() string {
 }
 
 type Vaccine struct {
-	Illness Illness
+	Illness      Illness
 	Manufacturer Manufacturer
 }
 
-func(i *Illness) FromString(s string) Illness {
+func (i *Illness) FromString(s string) Illness {
 	switch strings.ToLower(s) {
 	case "covid19":
 		return Covid19
