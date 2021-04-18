@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"golang.org/x/text/message"
+
 	"github.com/thehungrysmurf/vax/config"
 	"github.com/thehungrysmurf/vax/db/store"
 
@@ -37,18 +39,32 @@ func main() {
 		w.Write([]byte("salud"))
 	})
 
-	r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		totals, err := dbClient.GetVaccinationTotals(ctx)
 		if err != nil {
 			fmt.Fprintf(w, "failed to get vaccination totals %v", err)
 		}
 
-		fmt.Fprintf(w, "Totals - Pfizer: %v, Moderna: %v, Janssen: %v", totals.Pfizer, totals.Moderna, totals.Janssen)
+		t, err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			fmt.Fprintf(w, "failed to parse template %v", err)
+		}
+
+		p := message.NewPrinter(message.MatchLanguage("en"))
+
+		ret := IndexPage{
+			Pfizer:  p.Sprint(totals.Pfizer),
+			Moderna: p.Sprint(totals.Moderna),
+			Janssen: p.Sprint(totals.Janssen),
+		}
+
+		if err := t.Execute(w, ret); err != nil {
+			fmt.Fprintf(w, "failed to execute template %v", err)
+		}
 	})
 
 	r.Get("/vaccine/{vaccine}", func(w http.ResponseWriter, r *http.Request) {
-		var m store.Manufacturer
-		vaccine := m.FromString(chi.URLParam(r, "vaccine"))
+		vaccine := store.ManufacturerFromString(chi.URLParam(r, "vaccine"))
 
 		counts, err := dbClient.GetSymptomCounts(ctx, vaccine)
 		if err != nil {
@@ -61,6 +77,8 @@ func main() {
 		}
 
 		ret := VaccinePage{
+			IsOverview:    true,
+			PageTitle:     vaccine.String(),
 			Vaccine:       vaccine.String(),
 			SymptomCounts: counts,
 		}
@@ -72,8 +90,7 @@ func main() {
 
 	// TODO return graceful web msg when err != nil in this handler
 	r.Get("/vaccine/{vaccine}/category/{name}/{sex}/{agemin}/{agemax}", func(w http.ResponseWriter, r *http.Request) {
-		var s store.Sex
-		sex := s.FromString(chi.URLParam(r, "sex"))
+		sex := store.SexFromString(chi.URLParam(r, "sex"))
 
 		ageMin := chi.URLParam(r, "agemin")
 		ageFloor, err := strconv.ParseInt(ageMin, 10, 32)
@@ -87,27 +104,41 @@ func main() {
 			fmt.Fprintf(w, "failed to convert age min to int: %v", err)
 		}
 
-		var m store.Manufacturer
-		vaccine := m.FromString(chi.URLParam(r, "vaccine"))
+		vaccine := store.ManufacturerFromString(chi.URLParam(r, "vaccine"))
 
-		category := chi.URLParam(r, "name")
+		categorySlug := chi.URLParam(r, "name")
+		categoryName, err := dbClient.GetCategoryName(ctx, categorySlug)
+		if err != nil {
+			fmt.Fprintf(w, "failed to get category %v", err)
+		}
 
-		results, err := dbClient.GetFilteredResults(ctx, sex, int(ageFloor), int(ageCeil), vaccine, category)
+		counts, err := dbClient.GetSymptomCounts(ctx, vaccine)
+		if err != nil {
+			fmt.Fprintf(w, "failed to get symptoms %v", err)
+		}
+
+		results, err := dbClient.GetFilteredResults(ctx, sex, int(ageFloor), int(ageCeil), vaccine, categorySlug)
 		if err != nil {
 			fmt.Fprintf(w, "failed to get results %v", err)
 		}
 
-		t, err := template.ParseFiles("templates/results.html")
+		t, err := template.ParseFiles("templates/vaccine.html")
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
-		ret := ResultsPage{
-			Vaccine:    vaccine.String(),
-			AgeMin:  int(ageFloor),
-			AgeMax: int(ageCeil),
-			Sex:        sex.String(),
-			Results:    results,
+		ret := VaccinePage{
+			PageTitle:     vaccine.String(),
+			Vaccine:       vaccine.String(),
+			SymptomCounts: counts,
+			ResultsPage: ResultsPage{
+				Vaccine:         vaccine.String(),
+				CurrentCategory: categoryName,
+				AgeMin:          int(ageFloor),
+				AgeMax:          int(ageCeil),
+				Sex:             sex.String(),
+				Results:         results,
+			},
 		}
 
 		if err := t.Execute(w, ret); err != nil {
@@ -121,20 +152,24 @@ func main() {
 }
 
 type VaccinePage struct {
-	Vaccine string
+	IsOverview    bool
+	PageTitle     string
+	Vaccine       string
 	SymptomCounts []store.SymptomCount
+	ResultsPage   ResultsPage
 }
 
 type ResultsPage struct {
-	Vaccine string
-	AgeMin int
-	AgeMax int
-	Sex string
-	Results []store.FilteredResult
+	Vaccine         string
+	CurrentCategory string
+	AgeMin          int
+	AgeMax          int
+	Sex             string
+	Results         []store.FilteredResult
 }
 
 type IndexPage struct {
-	Pfizer int64
-	Moderna int64
-	Janssen int64
+	Pfizer  string
+	Moderna string
+	Janssen string
 }
