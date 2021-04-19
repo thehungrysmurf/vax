@@ -116,17 +116,17 @@
                             <ul class="toc__menu">
                                 {{$vaccine := .VaccineSlug}}
                                 {{range $sc := .SymptomCounts}}
-                                    <li>
-                                        <a href="#" class="category-toggle">{{$sc.Category}} reports: {{$sc.Count}}</a>
-                                        <ul>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/18/30">Female 18 - 30 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/31/60">Female 31 - 60 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/61/90">Female 61 - 90 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/18/30">Male 18 - 30 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/31/60">Male 31 - 60 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/61/90">Male 61 - 90 years</a></li>
-                                        </ul>
-                                    </li>
+                                <li>
+                                    <a href="#" class="category-toggle">{{$sc.Category}} reports: {{$sc.Count}}</a>
+                                    <ul>
+                                        <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/18/30">Female 18 - 30 years</a></li>
+                                        <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/31/60">Female 31 - 60 years</a></li>
+                                        <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/61/90">Female 61 - 90 years</a></li>
+                                        <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/18/30">Male 18 - 30 years</a></li>
+                                        <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/31/60">Male 31 - 60 years</a></li>
+                                        <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/61/90">Male 61 - 90 years</a></li>
+                                    </ul>
+                                </li>
                                 {{end}}
                             </ul>
 
@@ -134,65 +134,65 @@
                     </aside>
 
                     {{if .IsOverview}}
-                        <!-- Optional opening text. May be good to describe what the results page is -->
-                        <p>This is a blurb about the vaccine.</p>
+                    <!-- Optional opening text. May be good to describe what the results page is -->
+                    <p>This is a blurb about the vaccine.</p>
                     {{else}}
 
-                        <h2 id="default-layout">{{.ResultsPage.CurrentCategory}} symptom reports</h2>
-                        <p>The base layout all other layouts inherit from. There’s not much to this layout apart from pulling in several <code class="language-plaintext highlighter-rouge">_includes</code>:</p>
+                    <h2 id="default-layout">{{.ResultsPage.CurrentCategory}} symptom reports</h2>
+                    <p>The base layout all other layouts inherit from. There’s not much to this layout apart from pulling in several <code class="language-plaintext highlighter-rouge">_includes</code>:</p>
 
-                        <!-- Warning style message -->
-                        <p class="notice--warning">
-                            <strong>Note:</strong>
-                            You won’t ever assign this layout directly to a post or page. Instead all other layouts will build off of it by setting
-                        </p>
-                        <!-- Danger style message -->
-                        <p class="notice--danger">
-                            <strong>Note:</strong>
-                            Has been known to mangle markup and break JavaScript… especially if inline
-                        </p>
+                    <!-- Warning style message -->
+                    <p class="notice--warning">
+                        <strong>Note:</strong>
+                        You won’t ever assign this layout directly to a post or page. Instead all other layouts will build off of it by setting
+                    </p>
+                    <!-- Danger style message -->
+                    <p class="notice--danger">
+                        <strong>Note:</strong>
+                        Has been known to mangle markup and break JavaScript… especially if inline
+                    </p>
 
-                        <!-- Notice style message -->
-                        <p class="notice--info">
-                            <strong>Note:</strong>
-                            If the page contains a table of contents, it will no longer appear to the right. Instead it will be forced into the main content container directly following the page’s title.
-                        </p>
+                    <!-- Notice style message -->
+                    <p class="notice--info">
+                        <strong>Note:</strong>
+                        If the page contains a table of contents, it will no longer appear to the right. Instead it will be forced into the main content container directly following the page’s title.
+                    </p>
 
-                        <h3 id="table-of-contents">{{.ResultsPage.Sex}}, {{.ResultsPage.AgeMin}} - {{.ResultsPage.AgeMax}} </h3>
+                    <h3 id="table-of-contents">{{.ResultsPage.Sex}}, {{.ResultsPage.AgeMin}} - {{.ResultsPage.AgeMax}} </h3>
 
-                        <p>Auto-generated table of contents list for your posts and pages can be enabled by adding</p>
+                    <p>Auto-generated table of contents list for your posts and pages can be enabled by adding</p>
 
-                        <table>
-                            <thead>
-                            <tr>
-                            <th>Age</th>
-                            <th>Reported</th>
-                            <th>Symptoms</th>
-                            <th>Notes</th>
+                    <table>
+                        <thead>
+                            <th>
+                                <th>Age</th>
+                                <th>Reported</th>
+                                <th>Symptoms</th>
+                                <th>Notes</th>
                             </tr>
-                            </thead>
-                            <tbody>
-                            {{range $row := .ResultsPage.Results}}
-                                <tr>
-                                    <!-- The first td is strong/bold just to show how to do it -->
-                                    <td><strong>{{$row.Age}}</strong></td>
-                                    <td>{{$row.ReportedAt}}</td>
-                                    <td>{{comma $row.Symptoms}}</td>
-                                    <td>
-                                        {{ellipsis $row.Notes}}
-                                        {{$s := len $row.Notes}}
-                                        {{if gt $s 100}}
-                                            <a href="#" class="short-notes">Read more</a>
-                                            <div class="full-notes">
-                                                <a href="#" class="close-notes">Close</a>
-                                                {{$row.Notes}}
-                                            </div>
-                                        {{end}}
-                                    </td>
-                                </tr>
-                            {{end}}
-                            </tbody>
-                        </table>
+                        </thead>
+                        <tbody>
+                        {{range $row := .ResultsPage.Results}}
+                            <tr>
+                                <!-- The first td is strong/bold just to show how to do it -->
+                                <td><strong>{{$row.Age}}</strong></td>
+                                <td>{{$row.ReportedAt}}</td>
+                                <td>{{comma $row.Symptoms}}</td>
+                                <td>
+                                    {{ellipsis $row.Notes}}
+                                    {{$s := len $row.Notes}}
+                                    {{if gt $s 100}}
+                                        <a href="#" class="short-notes">Read more</a>
+                                        <div class="full-notes">
+                                            <a href="#" class="close-notes">Close</a>
+                                            {{$row.Notes}}
+                                        </div>
+                                    {{end}}
+                                </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
                     {{end}}
                 </section>
                 <footer class="page__meta">
@@ -241,7 +241,7 @@
             link.parentNode.parentNode.className = "category-open";
         }
     }
-
+/*
     var ellipsis = document.getElementsByClassName("short-notes");
     for (var i = 0; i < ellipsis.length; i++) {
         var el = ellipsis[i];
@@ -255,7 +255,8 @@
             }
         }
     }
-
+*/
+    /*
     var close = document.getElementsByClassName("close-notes");
     for (var i = 0; i < close.length; i++) {
         var el = close[i];
@@ -265,6 +266,7 @@
             td.className = "";
         }
     }
+    */
 </script>
 </body>
 </html>
