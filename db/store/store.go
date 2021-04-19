@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/thehungrysmurf/vax/data"
 )
 
 type Store interface {
@@ -82,7 +83,7 @@ func (d *DB) InsertSymptom(ctx context.Context, s Symptom) (int64, error) {
 	return id, err
 }
 
-const InsertPeopleSymptomQuery = `INSERT INTO people_symptoms(vaers_id, symptom_id, vaccine_id) VALUES ($1, $2, $3);`
+const InsertPeopleSymptomQuery = `INSERT INTO people_symptoms(vaers_id, symptom_id, vaccine_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;`
 
 func (d *DB) InsertPeopleSymptom(ctx context.Context, vaersID, symID int64, vaxID int) error {
 	_, err := d.conn.Exec(ctx, InsertPeopleSymptomQuery, vaersID, symID, vaxID)
@@ -149,12 +150,13 @@ func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([
 
 type FilteredResult struct {
 	Age      int      `db:"age"`
+	ReportedAt string `db:"reported_at"`
 	Notes    string   `db:"notes"`
 	Symptoms []string `db:"symptoms"`
 }
 
 // TODO add reported_at to results?
-const SelectFilteredResults = `SELECT p.age as age, json_agg(DISTINCT p.notes) as notes, json_agg(s.name) as symptoms FROM people p
+const SelectFilteredResults = `SELECT p.age as age, p.reported_at as reported_at, p.notes as notes, json_agg(s.name) as symptoms FROM people p
 JOIN people_symptoms ps ON p.vaers_id = ps.vaers_id
 JOIN symptoms s ON s.id = ps.symptom_id
 JOIN symptoms_categories sc ON sc.symptom_id = s.id
@@ -164,8 +166,8 @@ WHERE p.sex = $1
 AND p.age BETWEEN $2 AND $3 
 AND v.manufacturer = $4
 AND c.name = $5
-GROUP BY p.age
-ORDER BY p.age;
+GROUP BY p.age, p.notes, p.reported_at
+ORDER BY p.age, p.reported_at;
 `
 
 func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int, manufacturer Manufacturer, category string) ([]FilteredResult, error) {
@@ -178,13 +180,19 @@ func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int
 
 	for rows.Next() {
 		fr := FilteredResult{}
-		var notes []string
-		if err := rows.Scan(&fr.Age, &notes, &fr.Symptoms); err != nil {
+		var reportedAt time.Time
+		if err := rows.Scan(&fr.Age, &reportedAt, &fr.Notes, &fr.Symptoms); err != nil {
 			return nil, fmt.Errorf("failed to scan result: %v", err)
 		}
-		if len(notes) > 0 {
-			fr.Notes = notes[0]
+		fr.ReportedAt = reportedAt.Format("2006-01-02")
+
+		// Replace symptoms with their plain English synonyms, if they exist
+		for i, sym := range fr.Symptoms {
+			if alias, ok := data.AliasesMap[sym]; ok {
+				fr.Symptoms[i] = alias
+			}
 		}
+
 		results = append(results, fr)
 	}
 

@@ -19,7 +19,7 @@ CREATE TABLE people(
 		NOT NULL
 		DEFAULT 'U',
 
-	notes VARCHAR(512)
+	notes VARCHAR
 		NOT NULL
 		DEFAULT '',
 

@@ -1,6 +1,6 @@
 package data
 
-var aliasesMap = map[string]string{
+var AliasesMap = map[string]string{
 	"pyrexia": "fever",
 	"dyspnoea": "shortness of breath",
 	"asthenia": "weakness",

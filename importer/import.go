@@ -1,4 +1,4 @@
-package data
+package importer
 
 import (
 	"bufio"
@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/thehungrysmurf/vax/data"
 	"github.com/thehungrysmurf/vax/db/store"
 )
 
@@ -78,15 +79,15 @@ func (i CSVImporter) Run() error {
 
 	for s, count := range symptomsMap {
 		if count >= 50 {
-			if _, ok := categoriesMap[s]; !ok {
+			if _, ok := data.CategoriesMap[s]; !ok {
 				log.Printf("!! symptom %s has been reported %v times and needs to be categorized !!", s, count)
 			}
 		}
 	}
 
-	for id, s := range summaryMap {
-		log.Printf("complete summary map, vaersID: %v, summary: %+v", id, *s)
-	}
+	// for id, s := range summaryMap {
+	// 	log.Printf("complete summary map, vaersID: %v, summary: %+v", id, *s)
+	// }
 
 	// Populate people_symptoms, symptoms_categories
 	for vaersID, summary := range summaryMap {
@@ -202,6 +203,12 @@ func (i CSVImporter) ReadVaccinesFile(ctx context.Context, summaryMap map[int64]
 				vaccineMap[id] = true
 
 				manufacturer := store.ManufacturerFromString(line[2])
+
+				// Ignore unknown vaccines
+				if manufacturer != store.Pfizer && manufacturer != store.Moderna && manufacturer != store.Janssen {
+					continue
+				}
+
 				v := store.Vaccine{
 					Illness:      Covid19,
 					Manufacturer: manufacturer,
@@ -209,13 +216,13 @@ func (i CSVImporter) ReadVaccinesFile(ctx context.Context, summaryMap map[int64]
 
 				vaccineID, err := i.DBClient.GetVaccineID(ctx, v)
 				if err != nil {
-					log.Printf("failed to get vaccine ID for vaers_id %v", line[0])
+					log.Printf("failed to get vaccine ID for vaers_id %v: %v", line[0], err)
 					continue
 				}
 
 				vaersID, err := strconv.ParseInt(line[0], 10, 64)
 				if err != nil {
-					log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
+					log.Printf("failed to convert vaers_id %q to int64, skipping row: %v", line[0], err)
 					continue
 				}
 
@@ -252,7 +259,7 @@ func (i CSVImporter) ReadReportsFile(ctx context.Context, summaryMap map[int64]*
 		if linesRead > 1 {
 			vaersID, err := strconv.ParseInt(line[0], 10, 64)
 			if err != nil {
-				log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
+				log.Printf("failed to convert vaers_id %q to int64, skipping row: %v", line[0], err)
 				continue
 			}
 
@@ -262,14 +269,14 @@ func (i CSVImporter) ReadReportsFile(ctx context.Context, summaryMap map[int64]*
 				if line[3] != "" {
 					age, err = strconv.ParseFloat(line[3], 0)
 					if err != nil {
-						log.Printf("failed to convert age %q to int64, skipping row", line[3])
+						log.Printf("failed to convert age %q to int64, skipping row: %v", line[3], err)
 						continue
 					}
 				}
 
 				reportedAt, err := time.Parse("01/02/2006", line[1])
 				if err != nil {
-					log.Printf("failed to convert reportedAt %q to time format, skipping row", line[1])
+					log.Printf("failed to convert reportedAt %q to time format, skipping row: %v", line[1], err)
 					continue
 				}
 
@@ -282,7 +289,7 @@ func (i CSVImporter) ReadReportsFile(ctx context.Context, summaryMap map[int64]*
 				}
 
 				if err = i.DBClient.InsertReport(ctx, r); err != nil {
-					log.Printf("failed to insert report for vaers_id %s %v", r.VaersID, err)
+					log.Printf("failed to insert report for vaers_id %v: %v", r.VaersID, err)
 					continue
 				}
 			}
@@ -331,14 +338,14 @@ func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64
 			for _, s := range symptoms {
 				if s != "" {
 					s = strings.ToLower(s)
-					categories, ok := categoriesMap[s]
+					categories, ok := data.CategoriesMap[s]
 					if !ok {
-						log.Printf("symptom %s not found in categories map, skipping", s)
+						//log.Printf("symptom %s not found in categories map, skipping", s)
 						continue
 					}
 
 					symptom := store.Symptom{Name: s}
-					if a, ok := aliasesMap[s]; ok {
+					if a, ok := data.AliasesMap[s]; ok {
 						symptom.Alias = a
 					}
 
@@ -351,12 +358,12 @@ func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64
 
 					vaersID, err := strconv.ParseInt(line[0], 10, 64)
 					if err != nil {
-						log.Printf("failed to convert vaers_id %q to int64, skipping row", line[0])
+						log.Printf("failed to convert vaers_id %q to int64, skipping row: %v", line[0], err)
 						continue
 					}
 
 					if _, ok := summaryMap[vaersID]; !ok {
-						log.Printf("failed to fetch summary for vaers_id %s, skipping row", vaersID)
+						//log.Printf("failed to fetch summary for vaers_id %v, skipping row", vaersID)
 						continue
 					}
 
@@ -364,7 +371,7 @@ func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64
 					for _, c := range categories {
 						cID, err := i.DBClient.GetCategoryID(ctx, c)
 						if err != nil {
-							log.Printf("failed to fetch category ID for category %s", c)
+							log.Printf("failed to fetch category ID for category %s: %v", c, err)
 						}
 						categoryIDs = append(categoryIDs, cID)
 					}

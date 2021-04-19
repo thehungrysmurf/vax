@@ -1,5 +1,7 @@
 #!/bin/bash
 
+psql -d vax -f ./db/scripts/drop_tables.sql
+
 psql -d vax -f ./db/tables/people.sql
 psql -d vax -f ./db/tables/symptoms.sql
 psql -d vax -f ./db/tables/people_symptoms.sql

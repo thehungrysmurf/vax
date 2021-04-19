@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/thehungrysmurf/vax/config"
-	"github.com/thehungrysmurf/vax/data"
 	"github.com/thehungrysmurf/vax/db/store"
+	"github.com/thehungrysmurf/vax/importer"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/joeshaw/envdecode"
@@ -27,9 +27,9 @@ func main() {
 
 	dbClient := store.NewDB(conn)
 
-	dataImporter := data.NewCSVImporter(cfg.VaccinationTotalsFilePath, cfg.ReportsFilePath, cfg.VaccinesFilePath, cfg.SymptomsFilePath, dbClient)
+	dataImporter := importer.NewCSVImporter(cfg.VaccinationTotalsFilePath, cfg.ReportsFilePath, cfg.VaccinesFilePath, cfg.SymptomsFilePath, dbClient)
 	if err := dataImporter.Run(); err != nil {
-		log.Fatalf("failed to import data: %v", err)
+		log.Fatalf("failed to importer data: %v", err)
 	}
 
 	defer conn.Close(ctx)

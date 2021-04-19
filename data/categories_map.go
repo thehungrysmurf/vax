@@ -1,6 +1,6 @@
 package data
 
-var categoriesMap = map[string][]string{
+var CategoriesMap = map[string][]string{
 	"headache": {"Flu-like"},
 	"pyrexia": {"Flu-like"},
 	"chills": {"Flu-like"},
