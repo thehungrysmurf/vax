@@ -51,6 +51,15 @@
         .open-notes .full-notes {
             display: block;
         }
+
+        .clear {
+            clear: both;
+        }
+
+        .sidebar__right {
+            position: relative;
+            float: right;
+        }
     </style>
     <!--[if IE]>
     <style>
@@ -117,7 +126,7 @@
                                 {{$vaccine := .VaccineSlug}}
                                 {{range $sc := .SymptomCounts}}
                                     <li>
-                                        <a href="#" class="category-toggle">{{$sc.Category}} reports: {{$sc.Count}}</a>
+                                        <a href="#" class="category-toggle">{{$sc.Category}} reports: {{formatNum $sc.Count}}</a>
                                         <ul>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/18/30">Female 18 - 30 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/31/60">Female 31 - 60 years</a></li>
@@ -129,7 +138,6 @@
                                     </li>
                                 {{end}}
                             </ul>
-
                         </nav>
                     </aside>
 
@@ -203,7 +211,6 @@
         </article>
     </div>
 </div>
-
 <div class="page__footer">
     <footer>
         <div class="page__footer-follow">
@@ -238,7 +245,7 @@
     for (var i = 0; i < symptomGroups.length; i++) {
         var link = symptomGroups[i];
         if(link.href == url) {
-            link.parentNode.parentNode.className = "category-open";
+            link.parentNode.parentNode.className += " category-open";
         }
     }
 

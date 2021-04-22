@@ -74,7 +74,13 @@ func main() {
 			fmt.Fprintf(w, "failed to get symptoms %v", err)
 		}
 
-		t, err := template.ParseFiles("templates/vaccine.html")
+		fm := funcMap()
+		b, err := ioutil.ReadFile("templates/vaccine.html")
+		if err != nil {
+			fmt.Fprintf(w, "failed to read template file %v", err)
+		}
+
+		t, err := template.New("").Funcs(fm).Parse(string(b))
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
@@ -83,7 +89,7 @@ func main() {
 			IsOverview:    true,
 			PageTitle:     vaccine.String(),
 			Vaccine:       vaccine.String(),
-			VaccineSlug: vaccineSlug,
+			VaccineSlug:   vaccineSlug,
 			SymptomCounts: counts,
 		}
 
@@ -127,24 +133,13 @@ func main() {
 			fmt.Fprintf(w, "failed to get results %v", err)
 		}
 
-		fm := template.FuncMap{
-			"ellipsis": func(s string) string {
-				if len(s) > 100 {
-					return s[:100] + "..."
-				}
-				return s
-			},
-			"comma": func(strs []string) string {
-				return strings.Join(strs, ", ")
-			},
-		}
-
+		fm := funcMap()
 		b, err := ioutil.ReadFile("templates/vaccine.html")
 		if err != nil {
 			fmt.Fprintf(w, "failed to read template file %v", err)
 		}
 
-		t, err := template.New("whatever").Funcs(fm).Parse(string(b))
+		t, err := template.New("").Funcs(fm).Parse(string(b))
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
@@ -152,7 +147,7 @@ func main() {
 		ret := VaccinePage{
 			PageTitle:     vaccine.String(),
 			Vaccine:       vaccine.String(),
-			VaccineSlug: vaccineSlug,
+			VaccineSlug:   vaccineSlug,
 			SymptomCounts: counts,
 			ResultsPage: ResultsPage{
 				Vaccine:         vaccine.String(),
@@ -174,11 +169,28 @@ func main() {
 	defer conn.Close(ctx)
 }
 
+func funcMap() template.FuncMap {
+	p := message.NewPrinter(message.MatchLanguage("en"))
+
+	return template.FuncMap{
+		"ellipsis": func(s string) string {
+			if len(s) > 100 {
+				return s[:100] + "..."
+			}
+			return s
+		},
+		"comma": func(strs []string) string {
+			return strings.Join(strs, ", ")
+		},
+		"formatNum": p.Sprint,
+	}
+}
+
 type VaccinePage struct {
 	IsOverview    bool
 	PageTitle     string
 	Vaccine       string
-	VaccineSlug string
+	VaccineSlug   string
 	SymptomCounts []store.SymptomCount
 	ResultsPage   ResultsPage
 }

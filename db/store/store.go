@@ -196,6 +196,6 @@ func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int
 		results = append(results, fr)
 	}
 
-	log.Printf("results: %#+v", results)
+	log.Printf(">>> found %d results", len(results))
 	return results, nil
 }
