@@ -58,31 +58,17 @@ func main() {
 			fmt.Fprintf(w, "failed to get vaccination totals %v", err)
 		}
 
-		fm := funcMap()
-		b, err := ioutil.ReadFile("templates/index.html")
-		if err != nil {
-			fmt.Fprintf(w, "failed to read template file %v", err)
-		}
-
-		t, err := template.New("").Funcs(fm).Parse(string(b))
-		if err != nil {
-			fmt.Fprintf(w, "failed to parse template %v", err)
-		}
-
-		t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
-		if err != nil {
-			fmt.Fprintf(w, "failed to parse partial templates %v", err)
-		}
-
 		ret := IndexPage{
 			Pfizer:  totals.Pfizer,
 			Moderna: totals.Moderna,
 			Janssen: totals.Janssen,
 		}
 
-		if err := t.Execute(w, ret); err != nil {
-			fmt.Fprintf(w, "failed to execute template %v", err)
-		}
+		render(w, "templates/index.html", ret)
+	})
+
+	r.Get("/about", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "templates/about.html", nil)
 	})
 
 	r.Get("/vaccine/{vaccine}", func(w http.ResponseWriter, r *http.Request) {
@@ -94,22 +80,6 @@ func main() {
 			fmt.Fprintf(w, "failed to get symptoms %v", err)
 		}
 
-		fm := funcMap()
-		b, err := ioutil.ReadFile("templates/vaccine.html")
-		if err != nil {
-			fmt.Fprintf(w, "failed to read template file %v", err)
-		}
-
-		t, err := template.New("").Funcs(fm).Parse(string(b))
-		if err != nil {
-			fmt.Fprintf(w, "failed to parse template %v", err)
-		}
-
-		t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
-		if err != nil {
-			fmt.Fprintf(w, "failed to parse partial templates %v", err)
-		}
-
 		ret := VaccinePage{
 			IsOverview:    true,
 			PageTitle:     vaccine.String(),
@@ -118,9 +88,7 @@ func main() {
 			SymptomCounts: counts,
 		}
 
-		if err := t.Execute(w, ret); err != nil {
-			fmt.Fprintf(w, "failed to execute template %v", err)
-		}
+		render(w, "templates/vaccine.html", ret)
 	})
 
 	r.Get("/vaccine/{vaccine}/category/{name}/{sex}/{agemin}/{agemax}", func(w http.ResponseWriter, r *http.Request) {
@@ -157,22 +125,6 @@ func main() {
 			fmt.Fprintf(w, "failed to get results %v", err)
 		}
 
-		fm := funcMap()
-		b, err := ioutil.ReadFile("templates/vaccine.html")
-		if err != nil {
-			fmt.Fprintf(w, "failed to read template file %v", err)
-		}
-
-		t, err := template.New("").Funcs(fm).Parse(string(b))
-		if err != nil {
-			fmt.Fprintf(w, "failed to parse template %v", err)
-		}
-
-		t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
-		if err != nil {
-			fmt.Fprintf(w, "failed to parse partial templates %v", err)
-		}
-
 		ret := VaccinePage{
 			PageTitle:     vaccine.String(),
 			Vaccine:       vaccine.String(),
@@ -188,9 +140,7 @@ func main() {
 			},
 		}
 
-		if err := t.Execute(w, ret); err != nil {
-			fmt.Fprintf(w, "failed to execute template %v", err)
-		}
+		render(w, "templates/vaccine.html", ret)
 	})
 
 	log.Fatal(http.ListenAndServe(":8888", r))
@@ -212,6 +162,28 @@ func funcMap() template.FuncMap {
 			return strings.Join(strs, ", ")
 		},
 		"formatNum": p.Sprint,
+	}
+}
+
+func render(w http.ResponseWriter, templateName string, ret interface{}) {
+	fm := funcMap()
+	b, err := ioutil.ReadFile(templateName)
+	if err != nil {
+		fmt.Fprintf(w, "failed to read template file %v", err)
+	}
+
+	t, err := template.New("").Funcs(fm).Parse(string(b))
+	if err != nil {
+		fmt.Fprintf(w, "failed to parse template %v", err)
+	}
+
+	t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
+	if err != nil {
+		fmt.Fprintf(w, "failed to parse partial templates %v", err)
+	}
+
+	if err := t.Execute(w, ret); err != nil {
+		fmt.Fprintf(w, "failed to execute template %v", err)
 	}
 }
 
