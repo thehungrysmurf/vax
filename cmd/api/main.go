@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -36,6 +38,19 @@ func main() {
 	dbClient := store.NewDB(conn)
 
 	r := chi.NewRouter()
+
+	workDir, _ := os.Getwd()
+
+	// define handler that serves HTTP requests with the content of the static assets
+	staticAssetsDir := filepath.Join(workDir, "/images")
+	fs := http.FileServer(http.Dir(staticAssetsDir))
+	// strip the prefix so the path isn't duplicated, which would return an error
+	fs = http.StripPrefix("/images", fs)
+
+	// serve static assets
+	r.Get("/images/*", func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	})
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		totals, err := dbClient.GetVaccinationTotals(ctx)
