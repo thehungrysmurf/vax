@@ -42,13 +42,13 @@ func main() {
 	workDir, _ := os.Getwd()
 
 	// define handler that serves HTTP requests with the content of the static assets
-	staticAssetsDir := filepath.Join(workDir, "/images")
+	staticAssetsDir := filepath.Join(workDir, "/assets")
 	fs := http.FileServer(http.Dir(staticAssetsDir))
 	// strip the prefix so the path isn't duplicated, which would return an error
-	fs = http.StripPrefix("/images", fs)
+	fs = http.StripPrefix("/assets", fs)
 
 	// serve static assets
-	r.Get("/images/*", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/assets/*", func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)
 	})
 
@@ -69,7 +69,7 @@ func main() {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
-		t, err = t.ParseFiles("templates/header.html", "templates/footer.html")
+		t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse partial templates %v", err)
 		}
@@ -105,7 +105,7 @@ func main() {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
-		t, err = t.ParseFiles("templates/header.html", "templates/footer.html")
+		t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse partial templates %v", err)
 		}
@@ -168,7 +168,7 @@ func main() {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
-		t, err = t.ParseFiles("templates/header.html", "templates/footer.html")
+		t, err = t.ParseFiles("templates/header.html", "templates/footer.html", "templates/last_updated.html")
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse partial templates %v", err)
 		}
