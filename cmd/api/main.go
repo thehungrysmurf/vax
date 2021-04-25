@@ -37,27 +37,27 @@ func main() {
 
 	r := chi.NewRouter()
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("salud"))
-	})
-
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		totals, err := dbClient.GetVaccinationTotals(ctx)
 		if err != nil {
 			fmt.Fprintf(w, "failed to get vaccination totals %v", err)
 		}
 
-		t, err := template.ParseFiles("templates/index.html")
+		fm := funcMap()
+		b, err := ioutil.ReadFile("templates/index.html")
+		if err != nil {
+			fmt.Fprintf(w, "failed to read template file %v", err)
+		}
+
+		t, err := template.New("").Funcs(fm).Parse(string(b))
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
-		p := message.NewPrinter(message.MatchLanguage("en"))
-
 		ret := IndexPage{
-			Pfizer:  p.Sprint(totals.Pfizer),
-			Moderna: p.Sprint(totals.Moderna),
-			Janssen: p.Sprint(totals.Janssen),
+			Pfizer:  totals.Pfizer,
+			Moderna: totals.Moderna,
+			Janssen: totals.Janssen,
 		}
 
 		if err := t.Execute(w, ret); err != nil {
@@ -205,7 +205,7 @@ type ResultsPage struct {
 }
 
 type IndexPage struct {
-	Pfizer  string
-	Moderna string
-	Janssen string
+	Pfizer  int64
+	Moderna int64
+	Janssen int64
 }

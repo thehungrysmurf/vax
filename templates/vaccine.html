@@ -128,12 +128,18 @@
                                     <li>
                                         <a href="#" class="category-toggle">{{$sc.Category}} reports: {{formatNum $sc.Count}}</a>
                                         <ul>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/18/30">Female 18 - 30 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/31/60">Female 31 - 60 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/61/90">Female 61 - 90 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/18/30">Male 18 - 30 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/31/60">Male 31 - 60 years</a></li>
-                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/61/90">Male 61 - 90 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/16/25">Female 16 - 25 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/26/39">Female 26 - 39 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/40/59">Female 40 - 59 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/60/75">Female 60 - 75 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/76/89">Female 76 - 89 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/90/110">Female 90+ years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/16/25">Male 16 - 25 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/26/39">Male 26 - 39 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/40/59">Male 40 - 59 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/60/75">Male 60 - 75 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/76/89">Male 76 - 89 years</a></li>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/90/110">Male 90+ years</a></li>
                                         </ul>
                                     </li>
                                 {{end}}
@@ -166,9 +172,7 @@
                             If the page contains a table of contents, it will no longer appear to the right. Instead it will be forced into the main content container directly following the page’s title.
                         </p>
 
-                        <h3 id="table-of-contents">{{.ResultsPage.Sex}}, {{.ResultsPage.AgeMin}} - {{.ResultsPage.AgeMax}} </h3>
-
-                        <p>Auto-generated table of contents list for your posts and pages can be enabled by adding</p>
+                        <h3 id="table-of-contents">{{.ResultsPage.Sex}}, {{.ResultsPage.AgeMin}} - {{.ResultsPage.AgeMax}} years </h3>
 
                         <table>
                             <thead>
@@ -215,7 +219,7 @@
     <footer>
         <div class="page__footer-follow">
             <ul class="social-icons">
-                <li><a href="https://github.com/mmistakes" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+                <li><a href="https://github.com/thehungrysmurf/vax" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
             </ul>
         </div>
         <div class="page__footer-copyright">
