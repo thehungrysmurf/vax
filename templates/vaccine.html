@@ -85,7 +85,7 @@
                                         {{if gt $s 100}}
                                             <a href="#" class="short-notes">Read more</a>
                                             <div class="full-notes">
-                                                <a href="#" class="close-notes">Close</a>
+                                                <div class="close-notes-bar"><a href="#" class="close-notes">Close</a></div>
                                                 {{$row.Notes}}
                                             </div>
                                         {{end}}
@@ -148,7 +148,7 @@
         var el = close[i];
         el.onclick = function(event) {
             event.preventDefault();
-            var td = this.parentElement.parentElement;
+            var td = this.parentElement.parentElement.parentElement;
             td.className = "";
         }
     }
