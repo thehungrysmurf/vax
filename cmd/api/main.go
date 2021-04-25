@@ -69,6 +69,11 @@ func main() {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
+		t, err = t.ParseFiles("templates/header.html", "templates/footer.html")
+		if err != nil {
+			fmt.Fprintf(w, "failed to parse partial templates %v", err)
+		}
+
 		ret := IndexPage{
 			Pfizer:  totals.Pfizer,
 			Moderna: totals.Moderna,
@@ -100,6 +105,11 @@ func main() {
 			fmt.Fprintf(w, "failed to parse template %v", err)
 		}
 
+		t, err = t.ParseFiles("templates/header.html", "templates/footer.html")
+		if err != nil {
+			fmt.Fprintf(w, "failed to parse partial templates %v", err)
+		}
+
 		ret := VaccinePage{
 			IsOverview:    true,
 			PageTitle:     vaccine.String(),
@@ -113,7 +123,6 @@ func main() {
 		}
 	})
 
-	// TODO return graceful web msg when err != nil in this handler
 	r.Get("/vaccine/{vaccine}/category/{name}/{sex}/{agemin}/{agemax}", func(w http.ResponseWriter, r *http.Request) {
 		sex := store.SexFromString(chi.URLParam(r, "sex"))
 
@@ -157,6 +166,11 @@ func main() {
 		t, err := template.New("").Funcs(fm).Parse(string(b))
 		if err != nil {
 			fmt.Fprintf(w, "failed to parse template %v", err)
+		}
+
+		t, err = t.ParseFiles("templates/header.html", "templates/footer.html")
+		if err != nil {
+			fmt.Fprintf(w, "failed to parse partial templates %v", err)
 		}
 
 		ret := VaccinePage{

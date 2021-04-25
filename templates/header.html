@@ -1,0 +1,111 @@
+{{define "header"}}
+    <!doctype html>
+    <!--
+      Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+      Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+      Free for personal and commercial use under the MIT license
+      https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+    -->
+    <html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>Layouts - Minimal Mistakes</title>
+        <meta name="description" content="Descriptions and samples of all layouts included with the theme and how to best use them.">
+        <meta name="author" content="Michael Rose">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <script>
+            document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+        </script>
+
+        <!-- For all browsers -->
+        <link rel="stylesheet" href="https://mmistakes.github.io/minimal-mistakes/assets/css/main.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+        <style>
+            .full-width {
+                width: 100%;
+            }
+
+            .toc__menu ul {
+                display: none;
+            }
+            .toc__menu .category-open {
+                display: block;
+            }
+
+            table td {
+                position: relative;
+            }
+            .full-notes {
+                display: none;
+                border: 1px solid #CCC;
+                background: #FFF;
+                box-shadow: 0 0 10px #CCC;
+                padding: 10px;
+
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 100;
+            }
+
+            .open-notes .full-notes {
+                display: block;
+            }
+
+            .clear {
+                clear: both;
+            }
+
+            .sidebar__right {
+                position: relative;
+                float: right;
+            }
+        </style>
+        <!--[if IE]>
+        <style>
+            /* old IE unsupported flexbox fixes */
+            .greedy-nav .site-title {
+                padding-right: 3em;
+            }
+            .greedy-nav button {
+                position: absolute;
+                top: 0;
+                right: 0;
+                height: 100%;
+            }
+        </style>
+        <![endif]-->
+    </head>
+
+    <body class="layout--splash">
+    <nav class="skip-links">
+        <h2 class="screen-reader-text">Skip links</h2>
+        <ul>
+            <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+            <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+            <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+        </ul>
+    </nav>
+    <div class="masthead">
+        <div class="masthead__inner-wrap">
+            <div class="masthead__menu">
+                <nav id="site-nav" class="greedy-nav">
+                    <a class="site-title" href="/">
+                        KnowYourVaccine.org
+                        <span class="site-subtitle">Covid19 vaccine adverse effects</span>
+                    </a>
+                    <ul class="visible-links">
+                        <li class="masthead__menu-item">
+                            <a href="/about">About</a>
+                        </li>
+                    </ul>
+                    <button class="greedy-nav__toggle hidden" type="button">
+                        <span class="visually-hidden">Toggle menu</span>
+                        <div class="navicon"></div>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </div>
+{{end}}
