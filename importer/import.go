@@ -79,6 +79,10 @@ func (i CSVImporter) Run() error {
 
 	for s, count := range symptomsMap {
 		if count >= 50 {
+			if _, ok := data.ExcludeSymptoms[s]; ok {
+				continue
+			}
+
 			if _, ok := data.CategoriesMap[s]; !ok {
 				log.Printf("!! symptom %s has been reported %v times and needs to be categorized !!", s, count)
 			}
@@ -340,7 +344,7 @@ func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64
 					s = strings.ToLower(s)
 					categories, ok := data.CategoriesMap[s]
 					if !ok {
-						log.Printf("symptom %s not found in categories map, skipping", s)
+						//log.Printf("symptom %s not found in categories map, skipping", s)
 						continue
 					}
 
@@ -363,7 +367,7 @@ func (i *CSVImporter) ReadSymptomsFile(ctx context.Context, vaccineMap map[int64
 					}
 
 					if _, ok := summaryMap[vaersID]; !ok {
-						log.Printf("failed to fetch summary for vaers_id %v, skipping row", vaersID)
+						//log.Printf("failed to fetch summary for vaers_id %v, skipping row", vaersID)
 						continue
 					}
 
