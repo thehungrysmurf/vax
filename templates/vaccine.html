@@ -37,31 +37,30 @@
                     </aside>
 
                     {{if .IsOverview}}
-                        <!-- Optional opening text. May be good to describe what the results page is -->
-                        <p>Use the categories on the right to see symptom reports ---></p>
+                        <p class="notice--info"> Use the categories on the right to see symptom reports.</p>
                     {{else}}
 
                         <h2 id="default-layout">{{.ResultsPage.CurrentCategory}} symptom reports</h2>
+                        <!--
                         <p>The base layout all other layouts inherit from. There’s not much to this layout apart from pulling in several <code class="language-plaintext highlighter-rouge">_includes</code>:</p>
 
-                        <!-- Warning style message -->
                         <p class="notice--warning">
                             <strong>Note:</strong>
                             You won’t ever assign this layout directly to a post or page. Instead all other layouts will build off of it by setting
                         </p>
-                        <!-- Danger style message -->
+
                         <p class="notice--danger">
                             <strong>Note:</strong>
                             Has been known to mangle markup and break JavaScript… especially if inline
                         </p>
 
-                        <!-- Notice style message -->
                         <p class="notice--info">
                             <strong>Note:</strong>
                             If the page contains a table of contents, it will no longer appear to the right. Instead it will be forced into the main content container directly following the page’s title.
                         </p>
+                         -->
 
-                        <h3 id="table-of-contents">{{.ResultsPage.Sex}}, {{.ResultsPage.AgeMin}} - {{.ResultsPage.AgeMax}} years </h3>
+                        <h3 class="notice--info" id="table-of-contents">{{.ResultsPage.Sex}}, {{.ResultsPage.AgeMin}} - {{.ResultsPage.AgeMax}} years </h3>
 
                         <table>
                             <thead>
@@ -75,10 +74,9 @@
                             <tbody>
                             {{range $row := .ResultsPage.Results}}
                                 <tr>
-                                    <!-- The first td is strong/bold just to show how to do it -->
-                                    <td><strong>{{$row.Age}}</strong></td>
+                                    <td>{{$row.Age}}</td>
                                     <td>{{$row.ReportedAt}}</td>
-                                    <td>{{comma $row.Symptoms}}</td>
+                                    <td><strong>{{comma $row.Symptoms}}</strong></td>
                                     <td>
                                         {{ellipsis $row.Notes}}
                                         {{$s := len $row.Notes}}

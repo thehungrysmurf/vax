@@ -78,7 +78,7 @@ func (i CSVImporter) Run() error {
 	}
 
 	for s, count := range symptomsMap {
-		if count >= 50 {
+		if count >= 100 {
 			if _, ok := data.ExcludeSymptoms[s]; ok {
 				continue
 			}

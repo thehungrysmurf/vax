@@ -125,9 +125,9 @@ JOIN symptoms s ON s.id = sc.symptom_id
 JOIN people_symptoms ps ON ps.symptom_id = s.id
 JOIN vaccines v ON v.id = ps.vaccine_id
 WHERE v.manufacturer = $1
+AND c.slug != 'errors-by-medical-staff'
 GROUP BY c.name, c.slug;`
 
-// For vaccine X, get me the count of all the people who reported symptoms under each category in the categories table
 func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
 	var counts []SymptomCount
 	rows, err := d.conn.Query(ctx, SelectSymptomCountsQuery, manufacturer)
@@ -144,7 +144,7 @@ func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([
 		counts = append(counts, sc)
 	}
 
-	log.Printf("counts: %#+v", counts)
+	log.Printf("--> Found symptom counts: %#+v", counts)
 	return counts, nil
 }
 
@@ -155,7 +155,6 @@ type FilteredResult struct {
 	Symptoms []string `db:"symptoms"`
 }
 
-// TODO add reported_at to results?
 const SelectFilteredResults = `SELECT p.age as age, p.reported_at as reported_at, p.notes as notes, json_agg(s.name) as symptoms FROM people p
 JOIN people_symptoms ps ON p.vaers_id = ps.vaers_id
 JOIN symptoms s ON s.id = ps.symptom_id
@@ -196,6 +195,6 @@ func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int
 		results = append(results, fr)
 	}
 
-	log.Printf(">>> found %d results", len(results))
+	log.Printf("--> Found %d filtered results.", len(results))
 	return results, nil
 }
