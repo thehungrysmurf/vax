@@ -2,3 +2,4 @@
 notes/
 .env
 .DS_Store
+test_data/
