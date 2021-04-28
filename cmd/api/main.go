@@ -143,6 +143,10 @@ func main() {
 		render(w, "templates/vaccine.html", ret)
 	})
 
+	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "templates/404.html", nil)
+	})
+
 	log.Fatal(http.ListenAndServe(":8888", r))
 
 	defer conn.Close(ctx)
