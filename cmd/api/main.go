@@ -67,11 +67,11 @@ func main() {
 		render(w, "templates/index.html", ret)
 	})
 
-	r.Get("/about", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/about/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "templates/about.html", nil)
 	})
 
-	r.Get("/vaccine/{vaccine}", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/vaccine/{vaccine}/", func(w http.ResponseWriter, r *http.Request) {
 		vaccineSlug := chi.URLParam(r, "vaccine")
 		vaccine := store.ManufacturerFromString(vaccineSlug)
 
@@ -91,7 +91,7 @@ func main() {
 		render(w, "templates/vaccine.html", ret)
 	})
 
-	r.Get("/vaccine/{vaccine}/category/{name}/{sex}/{agemin}/{agemax}", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/vaccine/{vaccine}/category/{name}/{sex}/{agemin}/{agemax}/", func(w http.ResponseWriter, r *http.Request) {
 		sex := store.SexFromString(chi.URLParam(r, "sex"))
 
 		ageMin := chi.URLParam(r, "agemin")

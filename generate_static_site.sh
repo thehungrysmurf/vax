@@ -14,21 +14,21 @@ for VACCINE in ${VACCINES[@]}; do
   VACCINE_PATH=vaccine/$VACCINE
 
   mkdir -p docs/$VACCINE_PATH
-  echo ">> $VAX_HOST/$VACCINE_PATH > docs/$VACCINE_PATH/index.html"
-  curl -s $VAX_HOST/$VACCINE_PATH > docs/$VACCINE_PATH/index.html
+  echo ">> $VAX_HOST/$VACCINE_PATH/ > docs/$VACCINE_PATH/index.html"
+  curl -s $VAX_HOST/$VACCINE_PATH/ > docs/$VACCINE_PATH/index.html
 
   for SEX in ${SEXES[@]}; do
     for CATEGORY in ${CATEGORIES[@]}; do
       for AGE_GROUP in ${AGE_GROUPS[@]}; do
         SUMMARY_PATH=vaccine/$VACCINE/category/$CATEGORY/$SEX/$AGE_GROUP
         mkdir -p docs/$SUMMARY_PATH
-        echo ">> $VAX_HOST/$SUMMARY_PATH > docs/$SUMMARY_PATH/index.html"
-        curl -s $VAX_HOST/$SUMMARY_PATH > docs/$SUMMARY_PATH/index.html
+        echo ">> $VAX_HOST/$SUMMARY_PATH/ > docs/$SUMMARY_PATH/index.html"
+        curl -s $VAX_HOST/$SUMMARY_PATH/ > docs/$SUMMARY_PATH/index.html
       done
     done
   done
 done
 
-curl -s $VAX_HOST/about > docs/about/index.html
+curl -s $VAX_HOST/about/ > docs/about/index.html
 curl -s $VAX_HOST/404 > docs/404.html
 
