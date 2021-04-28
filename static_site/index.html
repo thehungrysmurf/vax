@@ -1,0 +1,202 @@
+
+    <!doctype html>
+    
+    <html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>Know Your Vaccine</title>
+        <meta name="description" content="Search Covid19 vaccine adverse effects as reported by the CDC">
+        <meta name="author" content="Silvia Gheorghita, Dane Harrigan">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <script>
+            document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+        </script>
+
+        
+        <link rel="stylesheet" href="/assets/css/main.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+        <style>
+            .full-width {
+                width: 100%;
+            }
+
+            .no-padding-right {
+                padding-right: 0;
+            }
+
+            .toc__menu ul {
+                display: none;
+            }
+            .toc__menu .category-open {
+                display: block;
+            }
+
+            table td {
+                position: relative;
+            }
+            .full-notes {
+                display: none;
+                border: 1px solid #CCC;
+                background: #FFF;
+                box-shadow: 0 0 10px #CCC;
+                padding: 10px;
+
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 100;
+                height: 250px;
+                width: 470px;
+                overflow: scroll;
+            }
+
+            .open-notes .full-notes {
+                display: block;
+            }
+
+            .close-notes-bar {
+                text-align: right;
+            }
+
+            .clear {
+                clear: both;
+            }
+
+            .sidebar__right {
+                position: relative;
+                float: right;
+            }
+        </style>
+        
+    </head>
+
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FS69Z1WR2E"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-FS69Z1WR2E');
+    </script>
+
+    <body class="layout--splash">
+    <nav class="skip-links">
+        <h2 class="screen-reader-text">Skip links</h2>
+        <ul>
+            <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+            <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+            <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+        </ul>
+    </nav>
+    <div class="masthead">
+        <div class="masthead__inner-wrap">
+            <div class="masthead__menu">
+                <nav id="site-nav" class="greedy-nav">
+                    <a class="site-title" href="/">
+                        KnowYourVaccine.org
+                        <span class="site-subtitle">Covid19 vaccine adverse effects</span>
+                    </a>
+                    <ul class="visible-links">
+                        <li class="masthead__menu-item">
+                            <a href="/about">About</a>
+                        </li>
+                    </ul>
+                    <button class="greedy-nav__toggle hidden" type="button">
+                        <span class="visually-hidden">Toggle menu</span>
+                        <div class="navicon"></div>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+
+<div class="initial-content">
+    <div class="page__hero--overlay"
+         style="background-color: #5e616c; background-image: url('https://mmistakes.github.io/minimal-mistakes/assets/images/mm-home-page-feature.jpg');"
+    >
+        <div class="wrapper">
+            <h1 id="page-title" class="page__title" itemprop="headline">Know Your Vaccine</h1>
+            <p class="page__lead">Search adverse effects from Covid19 vaccines in the US <br />as reported by the CDC</p>
+        </div>
+    </div>
+    <div id="main" role="main">
+        <article class="splash">
+            <meta itemprop="description" >
+            <section class="page__content" itemprop="text">
+                <div class="feature__wrapper">
+                    <div class="feature__item">
+                        <div class="archive__item">
+                            <div class="archive__item-teaser">
+                                <a href="/vaccine/pfizer"><img src="/assets/images/pfizer_logo_resized.jpg" alt="Pfizer" />
+                                </a>
+                            </div>
+                            <div class="archive__item-body">
+                                <h2 class="archive__item-title">Pfizer</h2>
+                                <div class="archive__item-excerpt">
+                                    <p>118,628,496 total vaccinations in the US</p>
+                                </div>
+                                <p><a href="/vaccine/pfizer" class="btn btn--primary">Learn more</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature__item">
+                        <div class="archive__item">
+                            <div class="archive__item-teaser">
+                                <a href="/vaccine/moderna"><img src="/assets/images/moderna_logo_resized.jpg" alt="Moderna" />
+                                </a>
+                            </div>
+                            <div class="archive__item-body">
+                                <h2 class="archive__item-title">Moderna</h2>
+                                <div class="archive__item-excerpt">
+                                    <p>98,778,973 total vaccinations in the US</p>
+                                </div>
+                                <p><a href="/vaccine/moderna" class="btn btn--primary">Learn more</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature__item">
+                        <div class="archive__item">
+                            <div class="archive__item-teaser">
+                                <a href="/vaccine/janssen"><img src="/assets/images/j_and_j_logo_resized.png" alt="Johnson &amp; Johnson" />
+                                </a>
+                            </div>
+                            <div class="archive__item-body">
+                                <h2 class="archive__item-title">Johnson & Johnson</h2>
+                                <div class="archive__item-excerpt">
+                                    <p>8,058,239 total vaccinations in the US</p>
+                                </div>
+                                <p><a href="/vaccine/janssen" class="btn btn--primary">Learn more</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+<footer class="page__meta">
+    <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-04-24">April 27, 2021</time></p>
+</footer>
+
+        </article>
+    </div>
+</div>
+
+
+    <div class="page__footer">
+        <footer>
+            <div class="page__footer-follow">
+                <ul class="social-icons">
+                    <li><a href="https://github.com/thehungrysmurf/vax" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+                </ul>
+            </div>
+            <div class="page__footer-copyright">
+                &copy;2021 KnowYourVaccine
+            </div>
+        </footer>
+    </div>
+
+
+</body>
+</html>
