@@ -1,10 +1,34 @@
 #!/bin/bash
 set -e
 
-mkdir -p docs/vaccine/pfizer
-
+mkdir -p docs/about
 cp -r assets docs
 
-curl http://localhost:8888 > docs/index.html
+VACCINES=(pfizer moderna janssen)
+CATEGORIES=(flu-like gastrointestinal psychological life-threatening skin-and-localized-to-injection-site muscles-and-bones immune-system nervous-system cardiovascular eyes-mouth-and-ears)
+SEXES=(male female)
+AGE_GROUPS=(16/25 26/39 40/59 60/75 76/89 90/110)
+VAX_HOST=http://localhost:8888
 
-curl http://localhost:8888/vaccine/pfizer > docs/vaccine/pfizer/index.html
+for VACCINE in ${VACCINES[@]}; do
+  VACCINE_PATH=vaccine/$VACCINE
+
+  mkdir -p docs/$VACCINE_PATH
+  echo ">> $VAX_HOST/$VACCINE_PATH > docs/$VACCINE_PATH/index.html"
+  curl -s $VAX_HOST/$VACCINE_PATH > docs/$VACCINE_PATH/index.html
+
+  for SEX in ${SEXES[@]}; do
+    for CATEGORY in ${CATEGORIES[@]}; do
+      for AGE_GROUP in ${AGE_GROUPS[@]}; do
+        SUMMARY_PATH=vaccine/$VACCINE/category/$CATEGORY/$SEX/$AGE_GROUP
+        mkdir -p docs/$SUMMARY_PATH
+        echo ">> $VAX_HOST/$SUMMARY_PATH > docs/$SUMMARY_PATH/index.html"
+        curl -s $VAX_HOST/$SUMMARY_PATH > docs/$SUMMARY_PATH/index.html
+      done
+    done
+  done
+done
+
+curl -s $VAX_HOST/about > docs/about/index.html
+curl -s $VAX_HOST/404 > docs/404.html
+
