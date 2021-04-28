@@ -29,6 +29,7 @@ for VACCINE in ${VACCINES[@]}; do
   done
 done
 
+curl -s $VAX_HOST/ > docs/index.html
 curl -s $VAX_HOST/about/ > docs/about/index.html
 curl -s $VAX_HOST/404 > docs/404.html
 
