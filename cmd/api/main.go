@@ -68,7 +68,7 @@ func main() {
 	})
 
 	r.Get("/about/", func(w http.ResponseWriter, r *http.Request) {
-		render(w, "templates/about.html", nil)
+		render(w, "templates/about.html", "About")
 	})
 
 	r.Get("/vaccine/{vaccine}/", func(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +83,7 @@ func main() {
 		ret := VaccinePage{
 			IsOverview:    true,
 			PageTitle:     vaccine.String(),
+			TabTitle:      vaccine.String(),
 			Vaccine:       vaccine.String(),
 			VaccineSlug:   vaccineSlug,
 			SymptomCounts: counts,
@@ -127,6 +128,7 @@ func main() {
 
 		ret := VaccinePage{
 			PageTitle:     vaccine.String(),
+			TabTitle:      fmt.Sprintf("%s: %s", vaccine.String(), categoryName),
 			Vaccine:       vaccine.String(),
 			VaccineSlug:   vaccineSlug,
 			SymptomCounts: counts,
@@ -194,6 +196,7 @@ func render(w http.ResponseWriter, templateName string, ret interface{}) {
 type VaccinePage struct {
 	IsOverview    bool
 	PageTitle     string
+	TabTitle      string
 	Vaccine       string
 	VaccineSlug   string
 	SymptomCounts []store.SymptomCount
