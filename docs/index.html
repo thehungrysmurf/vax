@@ -4,7 +4,7 @@
     <html lang="en" class="no-js">
     <head>
         <meta charset="utf-8">
-        <title>Know Your Vaccine</title>
+        <title>Know Your Vaccine - Home</title>
         <meta name="description" content="Search Covid19 vaccine adverse effects as reported by the CDC">
         <meta name="author" content="Silvia Gheorghita, Dane Harrigan">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,6 +67,15 @@
                 position: relative;
                 float: right;
             }
+
+            @media (max-width:600px) {
+                .full-notes {
+                    width: 100%;
+                }
+                .page__content h2 {
+                    clear: both;
+                }
+            }
         </style>
         
     </head>
@@ -96,11 +105,11 @@
                 <nav id="site-nav" class="greedy-nav">
                     <a class="site-title" href="/">
                         KnowYourVaccine.org
-                        <span class="site-subtitle">Covid19 vaccine adverse effects</span>
+                        <span class="site-subtitle">An unbiased view of Covid19 vaccine adverse effects</span>
                     </a>
                     <ul class="visible-links">
                         <li class="masthead__menu-item">
-                            <a href="/about">About</a>
+                            <a href="/about/">About</a>
                         </li>
                     </ul>
                     <button class="greedy-nav__toggle hidden" type="button">
@@ -130,7 +139,7 @@
                     <div class="feature__item">
                         <div class="archive__item">
                             <div class="archive__item-teaser">
-                                <a href="/vaccine/pfizer"><img src="/assets/images/pfizer_logo_resized.jpg" alt="Pfizer" />
+                                <a href="/vaccine/pfizer/"><img src="/assets/images/pfizer_logo_resized.jpg" alt="Pfizer" />
                                 </a>
                             </div>
                             <div class="archive__item-body">
@@ -138,14 +147,14 @@
                                 <div class="archive__item-excerpt">
                                     <p>118,628,496 total vaccinations in the US</p>
                                 </div>
-                                <p><a href="/vaccine/pfizer" class="btn btn--primary">Learn more</a></p>
+                                <p><a href="/vaccine/pfizer/" class="btn btn--primary">Learn more</a></p>
                             </div>
                         </div>
                     </div>
                     <div class="feature__item">
                         <div class="archive__item">
                             <div class="archive__item-teaser">
-                                <a href="/vaccine/moderna"><img src="/assets/images/moderna_logo_resized.jpg" alt="Moderna" />
+                                <a href="/vaccine/moderna/"><img src="/assets/images/moderna_logo_resized.jpg" alt="Moderna" />
                                 </a>
                             </div>
                             <div class="archive__item-body">
@@ -153,14 +162,14 @@
                                 <div class="archive__item-excerpt">
                                     <p>98,778,973 total vaccinations in the US</p>
                                 </div>
-                                <p><a href="/vaccine/moderna" class="btn btn--primary">Learn more</a></p>
+                                <p><a href="/vaccine/moderna/" class="btn btn--primary">Learn more</a></p>
                             </div>
                         </div>
                     </div>
                     <div class="feature__item">
                         <div class="archive__item">
                             <div class="archive__item-teaser">
-                                <a href="/vaccine/janssen"><img src="/assets/images/j_and_j_logo_resized.png" alt="Johnson &amp; Johnson" />
+                                <a href="/vaccine/janssen/"><img src="/assets/images/j_and_j_logo_resized.png" alt="Johnson &amp; Johnson" />
                                 </a>
                             </div>
                             <div class="archive__item-body">
@@ -168,7 +177,7 @@
                                 <div class="archive__item-excerpt">
                                     <p>8,058,239 total vaccinations in the US</p>
                                 </div>
-                                <p><a href="/vaccine/janssen" class="btn btn--primary">Learn more</a></p>
+                                <p><a href="/vaccine/janssen/" class="btn btn--primary">Learn more</a></p>
                             </div>
                         </div>
                     </div>
