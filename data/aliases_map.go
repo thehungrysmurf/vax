@@ -49,7 +49,7 @@ var AliasesMap = map[string]string{
 	"induration": "hardening",
 	"epistaxis": "nosebleed",
 	"pharyngeal paraesthesia": "feeling of choking",
-	"deep vein thrombosis": "blood clot",
+	"deep vein thrombosis": "deep vein blood clot",
 	"thrombosis": "blood clot",
 	"neuralgia": "nerve pain",
 	"dyspepsia": "indigestion",
@@ -69,4 +69,6 @@ var AliasesMap = map[string]string{
 	"haemorrhage": "excessive bleeding",
 	"injection site erythema": "injection site redness",
 	"herpes zoster": "shingles",
+	"somnolence": "sleepiness",
+	"dyspnoea exertional": "exercise-induced asthma",
 }
