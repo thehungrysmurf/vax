@@ -13,7 +13,7 @@
                             <header><h4 class="nav__title">Symptoms reported</h4></header>
                             <ul class="toc__menu">
                                 {{$vaccine := .VaccineSlug}}
-                                {{range $sc := .SymptomCounts}}
+                                {{range $sc := .CategoryCounts}}
                                     <li>
                                         <a href="#" class="category-toggle">{{$sc.Category}} reports: {{formatNum $sc.Count}}</a>
                                         <ul>
@@ -38,6 +38,66 @@
 
                     {{if .IsOverview}}
                         <p class="notice--info"> Use the categories on the right to see symptom reports.</p>
+
+                        <!-- Load d3.js -->
+                        <script src="https://d3js.org/d3.v4.js"></script>
+
+                        <!-- Create a div where the graph will take place -->
+                        <div id="my_dataviz"></div>
+
+                    <script>
+
+                        // set the dimensions and margins of the graph
+                        var margin = {top: 20, right: 30, bottom: 40, left: 150},
+                            width = 860 - margin.left - margin.right,
+                            height = 600 - margin.top - margin.bottom;
+
+                        // append the svg object to the body of the page
+                        var svg = d3.select("#my_dataviz")
+                            .append("svg")
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.top + margin.bottom)
+                            .append("g")
+                            .attr("transform",
+                                "translate(" + margin.left + "," + margin.top + ")");
+
+                        var data = {{.D3Data}};
+                        var maxWidth = data[0].Count;
+
+
+                        // Add X axis
+                        var x = d3.scaleLinear()
+                            .domain([0, maxWidth])
+                            .range([ 0, width]);
+                        svg.append("g")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(d3.axisBottom(x))
+                            .selectAll("text")
+                            .attr("transform", "translate(-10,0)rotate(-45)")
+                            .style("text-anchor", "end");
+
+                        // Y axis
+                        var y = d3.scaleBand()
+                            .range([ 0, height ])
+                            .domain(data.map(function(d) { return d.Symptom; }))
+                            .padding(.1);
+                        svg.append("g")
+                            .call(d3.axisLeft(y))
+
+                        //Bars
+                        svg.selectAll("myRect")
+                            .data(data)
+                            .enter()
+                            .append("rect")
+                            .attr("x", x(0) )
+                            .attr("y", function(d) { return y(d.Symptom); })
+                            .attr("width", function(d) { return x(d.Count); })
+                            .attr("height", y.bandwidth() )
+                            .attr("fill", "#69b3a2")
+                            .append("title")
+                            .text(function (d) { return d.Category })
+                    </script>
+
                     {{else}}
 
                         <h2 id="default-layout">{{.ResultsPage.CurrentCategory}} symptom reports</h2>

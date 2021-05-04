@@ -20,7 +20,7 @@ type Store interface {
 	GetVaccineID(ctx context.Context, v Vaccine) (int, error)
 	GetCategoryID(ctx context.Context, cat string) (int, error)
 	GetCategoryName(ctx context.Context, catSlug string) (string, error)
-	GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error)
+	GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]CategoryCount, error)
 	GetFilteredResults(ctx context.Context, sex Sex, ageFloor, ageCeiling int, manufacturer Manufacturer, categoryName string) ([]FilteredResult, error)
 }
 
@@ -113,13 +113,13 @@ func (d *DB) GetCategoryName(ctx context.Context, catSlug string) (string, error
 	return name, err
 }
 
-type SymptomCount struct {
+type CategoryCount struct {
 	Category     string `db:"category"`
 	CategorySlug string `db:"slug"`
 	Count        int64  `db:"count"`
 }
 
-const SelectSymptomCountsQuery = `SELECT c.name as category, c.slug as slug, count(ps.vaers_id) as count FROM categories c
+const SelectCategoryCountsQuery = `SELECT c.name as category, c.slug as slug, count(ps.vaers_id) as count FROM categories c
 JOIN symptoms_categories sc ON c.id = sc.category_id
 JOIN symptoms s ON s.id = sc.symptom_id
 JOIN people_symptoms ps ON ps.symptom_id = s.id
@@ -128,34 +128,34 @@ WHERE v.manufacturer = $1
 AND c.slug != 'errors-by-medical-staff'
 GROUP BY c.name, c.slug;`
 
-func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
-	var counts []SymptomCount
-	rows, err := d.conn.Query(ctx, SelectSymptomCountsQuery, manufacturer)
+func (d *DB) GetCategoryCounts(ctx context.Context, manufacturer Manufacturer) ([]CategoryCount, error) {
+	var counts []CategoryCount
+	rows, err := d.conn.Query(ctx, SelectCategoryCountsQuery, manufacturer)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		sc := SymptomCount{}
+		sc := CategoryCount{}
 		if err := rows.Scan(&sc.Category, &sc.CategorySlug, &sc.Count); err != nil {
 			return nil, fmt.Errorf("failed to scan result: %v", err)
 		}
 		counts = append(counts, sc)
 	}
 
-	log.Printf("--> Found symptom counts: %#+v", counts)
+	log.Printf("--> Found category counts: %#+v", counts)
 	return counts, nil
 }
 
 type FilteredResult struct {
-	Age      int      `db:"age"`
-	ReportedAt string `db:"reported_at"`
-	Notes    string   `db:"notes"`
-	Symptoms []string `db:"symptoms"`
+	Age        int      `db:"age"`
+	ReportedAt string   `db:"reported_at"`
+	Notes      string   `db:"notes"`
+	Symptoms   []string `db:"symptoms"`
 }
 
-const SelectFilteredResults = `SELECT p.age as age, p.reported_at as reported_at, p.notes as notes, json_agg(s.name) as symptoms FROM people p
+const SelectFilteredResultsQuery = `SELECT p.age as age, p.reported_at as reported_at, p.notes as notes, json_agg(s.name) as symptoms FROM people p
 JOIN people_symptoms ps ON p.vaers_id = ps.vaers_id
 JOIN symptoms s ON s.id = ps.symptom_id
 JOIN symptoms_categories sc ON sc.symptom_id = s.id
@@ -171,7 +171,7 @@ ORDER BY p.age, p.reported_at;
 
 func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int, manufacturer Manufacturer, category string) ([]FilteredResult, error) {
 	var results []FilteredResult
-	rows, err := d.conn.Query(ctx, SelectFilteredResults, sex, ageMin, ageMax, manufacturer, category)
+	rows, err := d.conn.Query(ctx, SelectFilteredResultsQuery, sex, ageMin, ageMax, manufacturer, category)
 	if err != nil {
 		return nil, err
 	}
@@ -196,5 +196,48 @@ func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int
 	}
 
 	log.Printf("--> Found %d filtered results.", len(results))
+	return results, nil
+}
+
+type SymptomCount struct {
+	Symptom  string
+	Count    int64
+	Category string
+}
+
+const SelectSymptomCountQuery = `
+SELECT s.name AS symptom, c.name AS category, count(ps.vaers_id) AS count FROM categories c
+JOIN symptoms_categories sc ON c.id = sc.category_id
+JOIN symptoms s ON s.id = sc.symptom_id
+JOIN people_symptoms ps ON ps.symptom_id = s.id
+JOIN vaccines v ON v.id = ps.vaccine_id
+WHERE v.manufacturer = $1 AND c.slug != 'errors-by-medical-staff'
+GROUP BY s.name, c.name ORDER BY count(ps.vaers_id) DESC
+LIMIT 30;
+`
+
+func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
+	var results []SymptomCount
+	rows, err := d.conn.Query(ctx, SelectSymptomCountQuery, manufacturer)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		sc := SymptomCount{}
+		if err := rows.Scan(&sc.Symptom, &sc.Category, &sc.Count); err != nil {
+			return nil, fmt.Errorf("failed to scan result: %v", err)
+		}
+
+		// Replace symptom with its plain English synonyms, if it exists
+		if alias, ok := data.AliasesMap[sc.Symptom]; ok {
+			sc.Symptom = alias
+		}
+
+		results = append(results, sc)
+	}
+
+	log.Printf("--> Found symptom counts: %#+v", results)
 	return results, nil
 }

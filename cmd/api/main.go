@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -75,18 +76,29 @@ func main() {
 		vaccineSlug := chi.URLParam(r, "vaccine")
 		vaccine := store.ManufacturerFromString(vaccineSlug)
 
-		counts, err := dbClient.GetSymptomCounts(ctx, vaccine)
+		catCounts, err := dbClient.GetCategoryCounts(ctx, vaccine)
 		if err != nil {
-			fmt.Fprintf(w, "failed to get symptoms %v", err)
+			fmt.Fprintf(w, "failed to get category counts %v", err)
+		}
+
+		symCounts, err := dbClient.GetSymptomCounts(ctx, vaccine)
+		if err != nil {
+			fmt.Fprintf(w, "failed to get symptom counts %v", err)
+		}
+
+		d3Data, err := json.Marshal(symCounts)
+		if err != nil {
+			fmt.Fprintf(w, "failed to marshal symptom counts %v", err)
 		}
 
 		ret := VaccinePage{
-			IsOverview:    true,
-			PageTitle:     vaccine.String(),
-			TabTitle:      vaccine.String(),
-			Vaccine:       vaccine.String(),
-			VaccineSlug:   vaccineSlug,
-			SymptomCounts: counts,
+			IsOverview:     true,
+			PageTitle:      vaccine.String(),
+			TabTitle:       vaccine.String(),
+			Vaccine:        vaccine.String(),
+			VaccineSlug:    vaccineSlug,
+			CategoryCounts: catCounts,
+			D3Data:         template.JS(d3Data),
 		}
 
 		render(w, "templates/vaccine.html", ret)
@@ -116,7 +128,7 @@ func main() {
 			fmt.Fprintf(w, "failed to get category %v", err)
 		}
 
-		counts, err := dbClient.GetSymptomCounts(ctx, vaccine)
+		counts, err := dbClient.GetCategoryCounts(ctx, vaccine)
 		if err != nil {
 			fmt.Fprintf(w, "failed to get symptoms %v", err)
 		}
@@ -127,11 +139,11 @@ func main() {
 		}
 
 		ret := VaccinePage{
-			PageTitle:     vaccine.String(),
-			TabTitle:      fmt.Sprintf("%s: %s", vaccine.String(), categoryName),
-			Vaccine:       vaccine.String(),
-			VaccineSlug:   vaccineSlug,
-			SymptomCounts: counts,
+			PageTitle:      vaccine.String(),
+			TabTitle:       fmt.Sprintf("%s: %s", vaccine.String(), categoryName),
+			Vaccine:        vaccine.String(),
+			VaccineSlug:    vaccineSlug,
+			CategoryCounts: counts,
 			ResultsPage: ResultsPage{
 				Vaccine:         vaccine.String(),
 				CurrentCategory: categoryName,
@@ -194,13 +206,14 @@ func render(w http.ResponseWriter, templateName string, ret interface{}) {
 }
 
 type VaccinePage struct {
-	IsOverview    bool
-	PageTitle     string
-	TabTitle      string
-	Vaccine       string
-	VaccineSlug   string
-	SymptomCounts []store.SymptomCount
-	ResultsPage   ResultsPage
+	IsOverview     bool
+	PageTitle      string
+	TabTitle       string
+	Vaccine        string
+	VaccineSlug    string
+	CategoryCounts []store.CategoryCount
+	ResultsPage    ResultsPage
+	D3Data         template.JS
 }
 
 type ResultsPage struct {
