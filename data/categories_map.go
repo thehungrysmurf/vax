@@ -506,7 +506,7 @@ var CategoriesMap = map[string][]string{
 	"renal pain":                                           {"Urinary"},
 	"constipation":                                         {"Gastrointestinal"},
 	"cardiac flutter":                                      {"Cardiovascular"},
-	"heavy menstrual bleeding":                             {"Cardiovascular"}, // revisit
+	"heavy menstrual bleeding":                             {"Gynecological"},
 	"abnormal dreams":                                      {"Psychological"},
 	"oral pain":                                            {"Eyes, mouth & ears"},
 	"impaired driving ability":                             {"Balance & mobility"},
@@ -560,7 +560,7 @@ var CategoriesMap = map[string][]string{
 	"guillain-barre syndrome":                              {"Immune system & inflammation"},
 	"amnesia":                                              {"Psychological"},
 	"abdominal pain lower":                                 {"Gastrointestinal"},
-	"abortion spontaneous":                                 {"Immune system & inflammation"}, // revisit, create gyno category
+	"abortion spontaneous":                                 {"Gynecological"},
 	"extra dose administered":                              {"Errors by medical staff"},
 	"vaccination site mass":                                {"Skin & localized to injection site"},
 	"arthritis":                                            {"Muscles & bones"},
@@ -589,11 +589,11 @@ var CategoriesMap = map[string][]string{
 	"thinking abnormal":                                    {"Psychological"},
 	"facial discomfort":                                    {"Muscles & bones"},
 	"rash maculo-papular":                                  {"Skin & localized to injection site"},
-	"breast swelling":                                      {"Immune system & inflammation"}, // revisit, gyno
+	"breast swelling":                                      {"Gynecological"},
 	"lip pruritus":                                         {"Eyes, mouth & ears"},
 	"eructation":                                           {"Gastrointestinal"},
 	"pulmonary pain":                                       {"Breathing"},
-	"menstruation irregular":                               {"Immune system & inflammation"}, // revisit, gyno
+	"menstruation irregular":                               {"Gynecological"},
 	"blepharospasm":                                        {"Eyes, mouth & ears"},
 	"eye disorder":                                         {"Eyes, mouth & ears"},
 	"haemoptysis":                                          {"Cardiovascular"},
@@ -609,27 +609,27 @@ var CategoriesMap = map[string][]string{
 	"abnormal behaviour":                                   {"Psychological"},
 	"respiration abnormal":                                 {"Breathing"},
 	"asthenopia":                                           {"Eyes, mouth & ears"},
-	"breast tenderness":                                    {"Muscles & bones"}, // revisit, gyno
+	"breast tenderness":                                    {"Gynecological"},
 	"seizure like phenomena":                               {"Nervous system"},
 	"dermatitis":                                           {"Skin & localized to injection site"},
 	"rheumatoid arthritis":                                 {"Muscles & bones"},
 	"skin mass":                                            {"Skin & localized to injection site"},
 	"incorrect product formulation administered":           {"Errors by medical staff"},
 	"heart rate abnormal":                                  {"Cardiovascular"},
-	"dysmenorrhoea":                                        {"Cardiovascular"}, // revisit, gyno
+	"dysmenorrhoea":                                        {"Gynecological"},
 	"tension headache":                                     {"Nervous system"},
 	"ischaemic stroke":                                     {"Cardiovascular", "Life threatening"},
 	"groin pain":                                           {"Muscles & bones"},
 	"generalised tonic-clonic seizure":                     {"Nervous system", "Life threatening"},
 	"chronic obstructive pulmonary disease":                {"Breathing"},
 	"blindness unilateral":                                 {"Eyes, mouth & ears"},
-	"intermenstrual bleeding":                              {"Cardiovascular"}, // revisit, gyno
+	"intermenstrual bleeding":                              {"Gynecological"},
 	"hypophagia":                                           {"Gastrointestinal"},
 	"ventricular extrasystoles":                            {"Cardiovascular"},
 	"electric shock sensation":                             {"Nervous system"},
 	"incoherent":                                           {"Psychological"},
 	"injection site vesicles":                              {"Skin & localized to injection site"},
-	"menstrual disorder":                                   {"Cardiovascular"}, // revisit, gyno
+	"menstrual disorder":                                   {"Gynecological"},
 	"angina pectoris":                                      {"Cardiovascular"},
 	"chromaturia":                                          {"Urinary"},
 	"pulse abnormal":                                       {"Cardiovascular"},

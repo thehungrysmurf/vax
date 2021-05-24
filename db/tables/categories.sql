@@ -30,3 +30,4 @@ INSERT INTO categories (name, slug) VALUES ('Errors by medical staff', 'errors-b
 INSERT INTO categories (name, slug) VALUES ('Breathing', 'breathing');
 INSERT INTO categories (name, slug) VALUES ('Urinary', 'urinary');
 INSERT INTO categories (name, slug) VALUES ('Balance & mobility', 'balance-and-mobility');
+INSERT INTO categories (name, slug) VALUES ('Gynecological', 'gynecological');
