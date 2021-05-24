@@ -540,7 +540,7 @@ var CategoriesMap = map[string][]string{
 	"sinus congestion":                                     {"Flu-like"},
 	"toothache":                                            {"Eyes, mouth & ears"},
 	"cerebral haemorrhage":                                 {"Cardiovascular", "Life threatening"},
-	"vaginal haemorrhage":                                  {"Cardiovascular", "Life threatening"},
+	"vaginal haemorrhage":                                  {"Gynecological", "Life threatening"},
 	"paralysis":                                            {"Nervous system"},
 	"tongue discomfort":                                    {"Eyes, mouth & ears"},
 	"feeling jittery":                                      {"Nervous system"}, // revisit
