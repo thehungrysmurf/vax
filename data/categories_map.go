@@ -216,6 +216,7 @@ var ExcludeSymptoms = map[string]struct{}{
 'Breathing'
 'Balance & mobility'
 'Errors by medical staff'
+'Gynecological'
 */
 
 var CategoriesMap = map[string][]string{

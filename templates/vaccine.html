@@ -17,18 +17,22 @@
                                     <li>
                                         <a href="#" class="category-toggle">{{$sc.Category}} reports: {{formatNum $sc.Count}}</a>
                                         <ul>
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/12/15/">Female 12 - 15 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/16/25/">Female 16 - 25 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/26/39/">Female 26 - 39 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/40/59/">Female 40 - 59 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/60/75/">Female 60 - 75 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/76/89/">Female 76 - 89 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/female/90/110/">Female 90+ years</a></li>
+                                            {{if ne $sc.Category "Gynecological"}}
+                                            <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/12/15/">Male 12 - 15 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/16/25/">Male 16 - 25 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/26/39/">Male 26 - 39 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/40/59/">Male 40 - 59 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/60/75/">Male 60 - 75 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/76/89/">Male 76 - 89 years</a></li>
                                             <li><a href="/vaccine/{{$vaccine}}/category/{{$sc.CategorySlug}}/male/90/110/">Male 90+ years</a></li>
+                                            {{end}}
                                         </ul>
                                     </li>
                                 {{end}}
