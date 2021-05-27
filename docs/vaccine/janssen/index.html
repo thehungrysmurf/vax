@@ -458,7 +458,7 @@
 
                         
                         <input type="checkbox" id="toggle-graph" />
-                        <label for="toggle-graph">Compare symptom counts to total vaccinations with Johnson &amp; Johnson</label>
+                        <label for="toggle-graph">Show only life threatening symptoms</label>
                         <div id="my_dataviz"></div>
 
                     <script>
@@ -469,28 +469,38 @@
                             height = 600 - margin.top - margin.bottom;
 
                         
-                        var svg = d3.select("#my_dataviz")
-                            .append("svg")
-                            .attr("width", width + margin.left + margin.right)
-                            .attr("height", height + margin.top + margin.bottom)
-                            .append("g")
-                            .attr("transform",
-                                "translate(" + margin.left + "," + margin.top + ")");
+                        var svg = d3.select("#my_dataviz").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform",
+                            "translate(" + margin.left + "," + margin.top + ")");
 
-                        var data = [{"Symptom":"headache","Count":10796,"Category":"Flu-like"},{"Symptom":"fever","Count":9126,"Category":"Flu-like"},{"Symptom":"chills","Count":8475,"Category":"Flu-like"},{"Symptom":"fatigue","Count":7152,"Category":"Flu-like"},{"Symptom":"nausea","Count":5598,"Category":"Gastrointestinal"},{"Symptom":"dizziness","Count":5307,"Category":"Balance \u0026 mobility"},{"Symptom":"pain in extremity","Count":3679,"Category":"Nervous system"},{"Symptom":"muscle pain","Count":2830,"Category":"Muscles \u0026 bones"},{"Symptom":"injection site pain","Count":2410,"Category":"Skin \u0026 localized to injection site"},{"Symptom":"sweating","Count":2187,"Category":"Flu-like"},{"Symptom":"joint pain","Count":2044,"Category":"Muscles \u0026 bones"},{"Symptom":"shortness of breath","Count":2006,"Category":"Breathing"},{"Symptom":"vomiting","Count":1965,"Category":"Gastrointestinal"},{"Symptom":"weakness","Count":1718,"Category":"Nervous system"},{"Symptom":"rash","Count":1388,"Category":"Skin \u0026 localized to injection site"},{"Symptom":"fainting","Count":1337,"Category":"Cardiovascular"},{"Symptom":"feeling abnormal","Count":1320,"Category":"Psychological"},{"Symptom":"diarrhea","Count":1271,"Category":"Gastrointestinal"},{"Symptom":"tremor","Count":1269,"Category":"Nervous system"},{"Symptom":"numbness","Count":1165,"Category":"Nervous system"},{"Symptom":"tingling","Count":1146,"Category":"Nervous system"},{"Symptom":"malaise","Count":1037,"Category":"Flu-like"},{"Symptom":"back pain","Count":962,"Category":"Muscles \u0026 bones"},{"Symptom":"loss of consciousness","Count":937,"Category":"Cardiovascular"},{"Symptom":"chest pain","Count":917,"Category":"Cardiovascular"},{"Symptom":"itchy skin","Count":902,"Category":"Skin \u0026 localized to injection site"},{"Symptom":"feeling hot","Count":854,"Category":"Nervous system"},{"Symptom":"influenza like illness","Count":847,"Category":"Flu-like"},{"Symptom":"heart rate increased","Count":831,"Category":"Cardiovascular"},{"Symptom":"feeling cold","Count":806,"Category":"Nervous system"}];
+                        
+                        var symCountsData = [{"Symptom":"headache","Count":10796,"Category":"Flu-like"},{"Symptom":"fever","Count":9126,"Category":"Flu-like"},{"Symptom":"chills","Count":8475,"Category":"Flu-like"},{"Symptom":"fatigue","Count":7152,"Category":"Flu-like"},{"Symptom":"nausea","Count":5598,"Category":"Gastrointestinal"},{"Symptom":"dizziness","Count":5307,"Category":"Balance \u0026 mobility"},{"Symptom":"pain in extremity","Count":3679,"Category":"Nervous system"},{"Symptom":"muscle pain","Count":2830,"Category":"Muscles \u0026 bones"},{"Symptom":"injection site pain","Count":2410,"Category":"Skin \u0026 localized to injection site"},{"Symptom":"sweating","Count":2187,"Category":"Flu-like"},{"Symptom":"joint pain","Count":2044,"Category":"Muscles \u0026 bones"},{"Symptom":"shortness of breath","Count":2006,"Category":"Breathing"},{"Symptom":"vomiting","Count":1965,"Category":"Gastrointestinal"},{"Symptom":"weakness","Count":1718,"Category":"Nervous system"},{"Symptom":"rash","Count":1388,"Category":"Skin \u0026 localized to injection site"},{"Symptom":"fainting","Count":1337,"Category":"Cardiovascular"},{"Symptom":"feeling abnormal","Count":1320,"Category":"Psychological"},{"Symptom":"diarrhea","Count":1271,"Category":"Gastrointestinal"},{"Symptom":"tremor","Count":1269,"Category":"Nervous system"},{"Symptom":"numbness","Count":1165,"Category":"Nervous system"},{"Symptom":"tingling","Count":1146,"Category":"Nervous system"},{"Symptom":"malaise","Count":1037,"Category":"Flu-like"},{"Symptom":"back pain","Count":962,"Category":"Muscles \u0026 bones"},{"Symptom":"loss of consciousness","Count":937,"Category":"Cardiovascular"},{"Symptom":"chest pain","Count":917,"Category":"Cardiovascular"},{"Symptom":"itchy skin","Count":902,"Category":"Skin \u0026 localized to injection site"},{"Symptom":"feeling hot","Count":854,"Category":"Nervous system"},{"Symptom":"influenza like illness","Count":847,"Category":"Flu-like"},{"Symptom":"heart rate increased","Count":831,"Category":"Cardiovascular"},{"Symptom":"feeling cold","Count":806,"Category":"Nervous system"}];
+                        var ltSymCountsData = [{"Symptom":"blood clot","Count":404,"Category":"Life threatening"},{"Symptom":"pulmonary embolism","Count":270,"Category":"Life threatening"},{"Symptom":"deep vein blood clot","Count":262,"Category":"Life threatening"},{"Symptom":"death","Count":251,"Category":"Life threatening"},{"Symptom":"cerebrovascular accident","Count":171,"Category":"Life threatening"},{"Symptom":"pneumonia","Count":68,"Category":"Life threatening"},{"Symptom":"anaphylactic reaction","Count":65,"Category":"Life threatening"},{"Symptom":"low platelet count","Count":63,"Category":"Life threatening"},{"Symptom":"vaginal haemorrhage","Count":63,"Category":"Life threatening"},{"Symptom":"atrial fibrillation","Count":60,"Category":"Life threatening"},{"Symptom":"heart attack","Count":51,"Category":"Life threatening"},{"Symptom":"blood clot in lung","Count":46,"Category":"Life threatening"},{"Symptom":"cerebral haemorrhage","Count":46,"Category":"Life threatening"},{"Symptom":"cardiac arrest","Count":40,"Category":"Life threatening"},{"Symptom":"transient ischaemic attack","Count":39,"Category":"Life threatening"},{"Symptom":"grand mal seizure","Count":28,"Category":"Life threatening"},{"Symptom":"excessive bleeding","Count":27,"Category":"Life threatening"},{"Symptom":"ischaemic stroke","Count":23,"Category":"Life threatening"},{"Symptom":"heart attack","Count":21,"Category":"Life threatening"},{"Symptom":"low blood platelet count","Count":20,"Category":"Life threatening"},{"Symptom":"acute respiratory failure","Count":19,"Category":"Life threatening"},{"Symptom":"sepsis","Count":18,"Category":"Life threatening"},{"Symptom":"cardiac failure congestive","Count":17,"Category":"Life threatening"},{"Symptom":"respiratory arrest","Count":15,"Category":"Life threatening"},{"Symptom":"respiratory failure","Count":14,"Category":"Life threatening"},{"Symptom":"cardio-respiratory arrest","Count":9,"Category":"Life threatening"}]
+
+                        update(symCountsData);
+
+                     function update(data) {
+                        
+                        d3.selectAll('.bars').remove();
+                        d3.selectAll('.xticks').remove();
+                        d3.selectAll('.yticks').remove();
+
                         var maxWidth = data[0].Count;
-                        var totalVax =  10163242 ;
 
                         
                         var x = d3.scaleLinear()
                             .domain([0, maxWidth])
                             .range([ 0, width]);
 
-                        var ticks = svg.append("g")
+                        var xTicks = svg.append("g")
                             .attr("transform", "translate(0," + height + ")")
+                            .attr('class', 'xticks')
                             .call(d3.axisBottom(x));
 
-                        ticks.selectAll("text")
+                        xTicks.selectAll("text")
                             .attr("transform", "translate(-10,0)rotate(-45)")
                             .style("text-anchor", "end");
 
@@ -499,14 +509,17 @@
                             .range([ 0, height ])
                             .domain(data.map(function(d) { return d.Symptom; }))
                             .padding(.1);
-                        svg.append("g")
+
+                        var yTicks = svg.append("g")
+                            .attr('class', 'yticks')
                             .call(d3.axisLeft(y))
 
                         
-                        const bar = svg.selectAll("myRect")
+                        var bar = svg.selectAll("rect")
                             .data(data)
                             .enter()
                             .append("rect")
+                            .attr('class', 'bars')
                             .attr("x", x(0) )
                             .attr("y", function(d) { return y(d.Symptom); })
                             .attr("width", function(d) { return x(d.Count); })
@@ -515,27 +528,15 @@
 
                         bar.append("title")
                             .text(function (d) { return d.Category })
+                     }
 
-                        
-                        function resizeGraph(newWidth) {
-                            var scale = x.domain([0, newWidth]);
-                            bar.transition()
-                                .duration(500) 
-                                .attr("width", function(d) { return scale(d.Count) });
-
-                            ticks.call(d3.axisBottom(scale))
-                                .selectAll("text")
-                                .attr("transform", "translate(-10,0)rotate(-45)")
-                                .style("text-anchor", "end");
+                    document.getElementById("toggle-graph").addEventListener("click", function(){
+                        if (this.checked) {
+                            update(ltSymCountsData);
+                        } else {
+                            update(symCountsData);
                         }
-
-                        document.getElementById("toggle-graph").addEventListener("click", function(){
-                            if (this.checked) {
-                                resizeGraph(totalVax);
-                            } else {
-                                resizeGraph(maxWidth);
-                            }
-                        })
+                    })
 
                     </script>
 
