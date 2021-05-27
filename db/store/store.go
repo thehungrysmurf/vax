@@ -166,7 +166,7 @@ AND p.age BETWEEN $2 AND $3
 AND v.manufacturer = $4
 AND c.name = $5
 GROUP BY p.age, p.notes, p.reported_at
-ORDER BY p.age, p.reported_at;
+ORDER BY p.age, p.reported_at, json_agg(s.name)::text;
 `
 
 func (d *DB) GetFilteredResults(ctx context.Context, sex Sex, ageMin, ageMax int, manufacturer Manufacturer, category string) ([]FilteredResult, error) {
