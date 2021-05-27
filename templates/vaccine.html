@@ -48,39 +48,49 @@
 
                         <!-- Create a div where the graph will be placed -->
                         <input type="checkbox" id="toggle-graph" />
-                        <label for="toggle-graph">Compare symptom counts to total vaccinations with {{.Vaccine}}</label>
+                        <label for="toggle-graph">Show only life threatening symptoms</label>
                         <div id="my_dataviz"></div>
 
                     <script>
 
-                        // set the dimensions and margins of the graph
+                        // Set the dimensions and margins of the graph
                         var margin = {top: 20, right: 30, bottom: 120, left: 150},
                             width = 860 - margin.left - margin.right,
                             height = 600 - margin.top - margin.bottom;
 
-                        // append the svg object to the body of the page
-                        var svg = d3.select("#my_dataviz")
-                            .append("svg")
-                            .attr("width", width + margin.left + margin.right)
-                            .attr("height", height + margin.top + margin.bottom)
-                            .append("g")
-                            .attr("transform",
-                                "translate(" + margin.left + "," + margin.top + ")");
+                        // Append the svg object to the body of the page
+                        var svg = d3.select("#my_dataviz").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform",
+                            "translate(" + margin.left + "," + margin.top + ")");
 
-                        var data = {{.D3Data}};
+                        // Assign data
+                        var symCountsData = {{.D3SymCounts}};
+                        var ltSymCountsData = {{.D3LTSymCounts}}
+
+                        update(symCountsData);
+
+                     function update(data) {
+                        // Cleanup before appending content
+                        d3.selectAll('.bars').remove();
+                        d3.selectAll('.xticks').remove();
+                        d3.selectAll('.yticks').remove();
+
                         var maxWidth = data[0].Count;
-                        var totalVax = {{.TotalVaccinationsCount}};
 
                         // X axis
                         var x = d3.scaleLinear()
                             .domain([0, maxWidth])
                             .range([ 0, width]);
 
-                        var ticks = svg.append("g")
+                        var xTicks = svg.append("g")
                             .attr("transform", "translate(0," + height + ")")
+                            .attr('class', 'xticks')
                             .call(d3.axisBottom(x));
 
-                        ticks.selectAll("text")
+                        xTicks.selectAll("text")
                             .attr("transform", "translate(-10,0)rotate(-45)")
                             .style("text-anchor", "end");
 
@@ -89,14 +99,17 @@
                             .range([ 0, height ])
                             .domain(data.map(function(d) { return d.Symptom; }))
                             .padding(.1);
-                        svg.append("g")
+
+                        var yTicks = svg.append("g")
+                            .attr('class', 'yticks')
                             .call(d3.axisLeft(y))
 
-                        //Bars
-                        const bar = svg.selectAll("myRect")
+                        // Bars
+                        var bar = svg.selectAll("rect")
                             .data(data)
                             .enter()
                             .append("rect")
+                            .attr('class', 'bars')
                             .attr("x", x(0) )
                             .attr("y", function(d) { return y(d.Symptom); })
                             .attr("width", function(d) { return x(d.Count); })
@@ -105,27 +118,15 @@
 
                         bar.append("title")
                             .text(function (d) { return d.Category })
+                     }
 
-                        // Resizing the graph resizeGraph(maxWidth) or resizeGraph(vaccinatedCount)
-                        function resizeGraph(newWidth) {
-                            var scale = x.domain([0, newWidth]);
-                            bar.transition()
-                                .duration(500) // milliseconds
-                                .attr("width", function(d) { return scale(d.Count) });
-
-                            ticks.call(d3.axisBottom(scale))
-                                .selectAll("text")
-                                .attr("transform", "translate(-10,0)rotate(-45)")
-                                .style("text-anchor", "end");
+                    document.getElementById("toggle-graph").addEventListener("click", function(){
+                        if (this.checked) {
+                            update(ltSymCountsData);
+                        } else {
+                            update(symCountsData);
                         }
-
-                        document.getElementById("toggle-graph").addEventListener("click", function(){
-                            if (this.checked) {
-                                resizeGraph(totalVax);
-                            } else {
-                                resizeGraph(maxWidth);
-                            }
-                        })
+                    })
 
                     </script>
 

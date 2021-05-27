@@ -241,3 +241,39 @@ func (d *DB) GetSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([
 	log.Printf("--> Found symptom counts: %#+v", results)
 	return results, nil
 }
+
+const SelectLifeThreateningSymptomCountQuery = `
+SELECT s.name AS symptom, c.name AS category, count(ps.vaers_id) AS count FROM categories c
+JOIN symptoms_categories sc ON c.id = sc.category_id
+JOIN symptoms s ON s.id = sc.symptom_id
+JOIN people_symptoms ps ON ps.symptom_id = s.id
+JOIN vaccines v ON v.id = ps.vaccine_id
+WHERE v.manufacturer = $1 AND c.slug = 'life-threatening'
+GROUP BY s.name, c.name ORDER BY count(ps.vaers_id) DESC
+`
+
+func (d *DB) GetLifeThreateningSymptomCounts(ctx context.Context, manufacturer Manufacturer) ([]SymptomCount, error) {
+	var results []SymptomCount
+	rows, err := d.conn.Query(ctx, SelectLifeThreateningSymptomCountQuery, manufacturer)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		sc := SymptomCount{}
+		if err := rows.Scan(&sc.Symptom, &sc.Category, &sc.Count); err != nil {
+			return nil, fmt.Errorf("failed to scan result: %v", err)
+		}
+
+		// Replace symptom with its plain English synonyms, if it exists
+		if alias, ok := data.AliasesMap[sc.Symptom]; ok {
+			sc.Symptom = alias
+		}
+
+		results = append(results, sc)
+	}
+
+	log.Printf("--> Found life threatening symptom counts: %#+v", results)
+	return results, nil
+}

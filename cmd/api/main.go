@@ -86,35 +86,30 @@ func main() {
 			fmt.Fprintf(w, "failed to get symptom counts %v", err)
 		}
 
-		var totalVaxPerVaccine int64
-		totals, err := dbClient.GetVaccinationTotals(ctx)
+		lifeThreateningSymCounts, err := dbClient.GetLifeThreateningSymptomCounts(ctx, vaccine)
 		if err != nil {
-			fmt.Fprintf(w, "failed to get vaccination totals %v", err)
+			fmt.Fprintf(w, "failed to get life threatening symptom counts %v", err)
 		}
 
-		switch vaccineSlug {
-		case store.Pfizer:
-			totalVaxPerVaccine = totals.Pfizer
-		case store.Moderna:
-			totalVaxPerVaccine = totals.Moderna
-		case store.Janssen:
-			totalVaxPerVaccine = totals.Janssen
-		}
-
-		d3Data, err := json.Marshal(symCounts)
+		d3SymCounts, err := json.Marshal(symCounts)
 		if err != nil {
 			fmt.Fprintf(w, "failed to marshal symptom counts %v", err)
 		}
 
+		d3LTSymCounts, err := json.Marshal(lifeThreateningSymCounts)
+		if err != nil {
+			fmt.Fprintf(w, "failed to marshal life threatening symptom counts %v", err)
+		}
+
 		ret := VaccinePage{
-			IsOverview:             true,
-			PageTitle:              vaccine.String(),
-			TabTitle:               vaccine.String(),
-			Vaccine:                vaccine.String(),
-			VaccineSlug:            vaccineSlug,
-			CategoryCounts:         catCounts,
-			D3Data:                 template.JS(d3Data),
-			TotalVaccinationsCount: totalVaxPerVaccine,
+			IsOverview:     true,
+			PageTitle:      vaccine.String(),
+			TabTitle:       vaccine.String(),
+			Vaccine:        vaccine.String(),
+			VaccineSlug:    vaccineSlug,
+			CategoryCounts: catCounts,
+			D3SymCounts:    template.JS(d3SymCounts),
+			D3LTSymCounts:  template.JS(d3LTSymCounts),
 		}
 
 		render(w, "templates/vaccine.html", ret)
@@ -222,15 +217,15 @@ func render(w http.ResponseWriter, templateName string, ret interface{}) {
 }
 
 type VaccinePage struct {
-	IsOverview             bool
-	PageTitle              string
-	TabTitle               string
-	Vaccine                string
-	VaccineSlug            string
-	CategoryCounts         []store.CategoryCount
-	ResultsPage            ResultsPage
-	D3Data                 template.JS
-	TotalVaccinationsCount int64
+	IsOverview     bool
+	PageTitle      string
+	TabTitle       string
+	Vaccine        string
+	VaccineSlug    string
+	CategoryCounts []store.CategoryCount
+	ResultsPage    ResultsPage
+	D3SymCounts    template.JS
+	D3LTSymCounts  template.JS
 }
 
 type ResultsPage struct {
