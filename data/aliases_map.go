@@ -143,4 +143,9 @@ var AliasesMap = map[string]string{
 	"haematuria":                       "blood in urine",
 	"odynophagia":                      "painful swallowing",
 	"eyelid ptosis":                    "drooping eyelid",
+	"aphthous ulcer":                   "canker sore",
+	"gingival pain":                    "painful gums",
+	"polymenorrhoea":                   "abnormally short menstrual cycles",
+	"oligomenorrhoea":                  "infrequent menstrual cycles",
+	"cerebral infarction":              "stroke",
 }

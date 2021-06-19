@@ -227,6 +227,15 @@ var ExcludeSymptoms = map[string]struct{}{
 	"neutrophil percentage increased":             {},
 	"hyponatraemia":                               {},
 	"secretion discharge":                         {},
+	"magnetic resonance imaging heart":            {},
+	"acoustic stimulation tests abnormal":         {},
+	"immunisation":                                {},
+	"pregnancy test negative":                     {},
+	"face injury":                                 {},
+	"respiratory viral panel":                     {},
+	"mammogram":                                   {},
+	"troponin i":                                  {},
+	"troponin i increased":                        {},
 }
 
 /*
@@ -698,4 +707,12 @@ var CategoriesMap = map[string][]string{
 	"sciatica":                                             {"Nervous system"},
 	"eyelid ptosis":                                        {"Eyes, mouth & ears"},
 	"mouth ulceration":                                     {"Eyes, mouth & ears"},
+	"pelvic pain":                                          {"Gynecological"},
+	"aphthous ulcer":                                       {"Eyes, mouth & ears"},
+	"gingival pain":                                        {"Eyes, mouth & ears"},
+	"product preparation error":                            {"Errors by medical staff"},
+	"ejection fraction decreased":                          {"Cardiovascular"},
+	"polymenorrhoea":                                       {"Gynecological"},
+	"oligomenorrhoea":                                      {"Gynecological"},
+	"cerebral infarction":                                  {"Cardiovascular", "Life threatening"},
 }
