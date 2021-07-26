@@ -19,6 +19,8 @@ import (
 
 const Covid19 = "covid19"
 
+var NonSymptomKeyWords = []string{"normal", "increased", "decreased", "count", "negative", "positive", "magnetic resonance imaging", "x-ray", "tomogram", "test", "examination", "rate", "percentage", "vitamin"}
+
 type Importer interface {
 	Run() error
 	ReadVaccinationTotalsFile() error
@@ -77,16 +79,29 @@ func (i CSVImporter) Run() error {
 		return err
 	}
 
+	var addToNonSymptoms []string
+
 	for s, count := range symptomsMap {
-		if count >= 200 {
-			if _, ok := data.ExcludeSymptoms[s]; ok {
+		if count >= 100 {
+			// Skip if it's a known non-symptom
+			if _, ok := data.NonSymptoms[s]; ok {
 				continue
 			}
-
 			if _, ok := data.CategoriesMap[s]; !ok {
-				log.Printf("!! symptom %s has been reported %v times and needs to be categorized !!", s, count)
+				// If it's not a known symptom, add to suspected non symptoms if it contains one of the key words
+				if containsKeyWord(s, NonSymptomKeyWords) {
+					addToNonSymptoms = append(addToNonSymptoms, s)
+				} else {
+					// Prompt to categorize it as a symptom
+					fmt.Printf("\"%s\" symptom has been reported %v times and needs to be categorized !!\n", s, count)
+				}
 			}
 		}
+	}
+
+	fmt.Println("Add to non symptoms map:")
+	for _, ns := range addToNonSymptoms {
+		fmt.Printf("\"%s\": {},\n", ns)
 	}
 
 	// for id, s := range summaryMap {
@@ -418,4 +433,13 @@ func sortBySymptomCount(symptomsMap map[string]int) {
 			fmt.Printf("%v %v\n", s, symptomsMap[s])
 		}
 	}
+}
+
+func containsKeyWord(s string, keywords []string) bool {
+	for _, w := range keywords {
+		if strings.Contains(s, w) {
+			return true
+		}
+	}
+	return false
 }
