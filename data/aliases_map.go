@@ -193,4 +193,10 @@ var AliasesMap = map[string]string{
 	"tonsillar hypertrophy":            "enlarged tonsils",
 	"ataxia":                           "impaired body coordination",
 	"amenorrhoea":                      "absence of menstrual periods",
+	"dermatitis acneiform":             "acne-like bumps",
+	"piloerection":                     "hair raised on the skin",
+	"pneumonitis":                      "lung inflammation",
+	"brain oedema":                     "brain swelling",
+	"nystagmus":                        "involuntary eye movements",
+	"dysphemia":                        "stammering",
 }
